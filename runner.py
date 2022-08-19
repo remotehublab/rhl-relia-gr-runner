@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import shutil
 import pathlib
 import tempfile
@@ -36,11 +37,17 @@ def main():
 
         open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
 
-        print(subprocess.check_output(['grcc', grc_filename, '-o', tmpdir]))
+        open(os.path.join(tmpdir, 'relia.json'), 'w').write(json.dumps({
+            'uploader_base_url': 'http://localhost:6001', # TODO
+            'session_id': 'my-session-id', # TODO
+            'device_id': 'my-device-id', # TODO
+        }))
+
+        print(subprocess.check_output(['grcc', grc_filename, '-o', tmpdir], cwd=tmpdir))
 
         print(tmpdir)
 
-        subprocess.run([sys.executable, py_filename])
+        subprocess.run([sys.executable, py_filename], cwd=tmpdir)
 
         input("Press any key to finish")
 

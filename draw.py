@@ -1,4 +1,4 @@
-# importing libraries
+# NOTE: this code will be removed from here!
 import redis
 import hashlib
 import numpy as np
