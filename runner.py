@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import shutil
 import pathlib
 import tempfile
@@ -45,7 +46,32 @@ def main():
             'session_id': 'my-session-id', # TODO
             'device_id': 'my-device-id', # TODO
         }))
-        print(subprocess.check_output(['grcc', grc_filename, '-o', tmpdir], cwd=tmpdir))
+
+        command = ['grcc', grc_filename, '-o', tmpdir]
+
+        try:
+            print(subprocess.check_output(command, cwd=tmpdir, text=True))
+        except subprocess.CalledProcessError as err:
+            print("Error processing grcc:", file=sys.stderr)
+            print("", file=sys.stderr)
+            print(f" $ {' '.join(command)}", file=sys.stderr)
+            print(err.output, file=sys.stderr)
+            print(" $", file=sys.stderr)
+            print("", file=sys.stderr)
+
+            tmp_directory = pathlib.Path(tempfile.gettempdir())
+            error_tmp_directory = tmp_directory / f"relia-error-tmp-{time.time()}"
+
+            os.mkdir(error_tmp_directory)
+            shutil.copy(os.path.join(tmpdir, 'user_file.grc'), error_tmp_directory)
+            shutil.copy(os.path.join(tmpdir, 'relia.json'), error_tmp_directory)
+            print(f"You can reproduce it going to the directory {error_tmp_directory} and running the command:", file=sys.stderr)
+            print("", file=sys.stderr)
+            print(f" $ cd {error_tmp_directory}", file=sys.stderr)
+            print(f" $ grcc {error_tmp_directory / 'user_file.grc'} -o {error_tmp_directory}", file=sys.stderr)
+            print("", file=sys.stderr)
+
+            raise
 
         print(tmpdir)
 
