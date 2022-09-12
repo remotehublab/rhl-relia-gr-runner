@@ -14,6 +14,9 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
+# From gnuradio.core.Constants
+DEFAULT_HIER_BLOCK_LIB_DIR = os.path.expanduser('~/.grc_gnuradio')
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=pathlib.Path, required=True)
@@ -21,19 +24,23 @@ def main():
 
     grc_content = yaml.load(open(args.input).read(), Loader=Loader)
 
-
-
     target_filename = 'target_file'
 
     grc_content['options']['parameters']['id'] = target_filename
     grc_content['options']['parameters']['generate_options'] = 'no_gui'
 
-    for block in grc_content['blocks']:
-        if block['id'] == 'qtgui_time_sink_x':
-            block['id'] = 'relia_time_sink_x'    	    	    
+    conversions = {
+        'qtgui_time_sink_x': 'relia_time_sink_x',
+        'qtgui_const_sink_x': 'relia_const_sink_x',
+    }
 
-        if block['id'] == 'qtgui_const_sink_x':
-            block['id'] = 'relia_const_sink_x'
+    for block in grc_content['blocks']:
+        if block['id'] in conversions:
+            block['id'] = conversions[block['id']]
+            block_yml = os.path.join(DEFAULT_HIER_BLOCK_LIB_DIR, f"{block['id']}.block.yml")
+            if not os.path.exists(block_yml):
+                raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
+
 
     with tempfile.TemporaryDirectory(prefix='relia-') as tmpdir:
         grc_filename = os.path.join(tmpdir, 'user_file.grc')
