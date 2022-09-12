@@ -40,7 +40,7 @@ line2, = ax.plot(x, y_imag)
 plt.title("RELIA", fontsize=20)
  
 # setting x-axis label and y-axis label
-plt.xlabel("Time")
+plt.xlabel("Tiime")
 plt.ylabel("Amplitude")
  
 while True:

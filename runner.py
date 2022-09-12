@@ -29,7 +29,10 @@ def main():
 
     for block in grc_content['blocks']:
         if block['id'] == 'qtgui_time_sink_x':
-            block['id'] = 'relia_time_sink_x'
+            block['id'] = 'relia_time_sink_x'    	    	    
+
+        if block['id'] == 'qtgui_const_sink_x':
+            block['id'] = 'relia_const_sink_x'
 
     with tempfile.TemporaryDirectory(prefix='relia-') as tmpdir:
         grc_filename = os.path.join(tmpdir, 'user_file.grc')
@@ -42,7 +45,6 @@ def main():
             'session_id': 'my-session-id', # TODO
             'device_id': 'my-device-id', # TODO
         }))
-
         print(subprocess.check_output(['grcc', grc_filename, '-o', tmpdir], cwd=tmpdir))
 
         print(tmpdir)
