@@ -32,6 +32,7 @@ def main():
     conversions = {
         'qtgui_time_sink_x': 'relia_time_sink_x',
         'qtgui_const_sink_x': 'relia_const_sink_x',
+        'qtgui_vector_sink_f': 'relia_vector_sink_f',
     }
 
     for block in grc_content['blocks']:
