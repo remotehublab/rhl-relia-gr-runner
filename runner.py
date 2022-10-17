@@ -33,6 +33,7 @@ def main():
         'qtgui_time_sink_x': 'relia_time_sink_x',
         'qtgui_const_sink_x': 'relia_const_sink_x',
         'qtgui_vector_sink_f': 'relia_vector_sink_f',
+        'qtgui_histogram_sink_x': 'relia_histogram_sink_x',
         'variable_qtgui_range': 'variable_relia_range',
     }
 
