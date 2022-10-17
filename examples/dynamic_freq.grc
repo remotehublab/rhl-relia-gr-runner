@@ -65,7 +65,9 @@ blocks:
     label: ''
     min_len: '200'
     orient: QtCore.Qt.Horizontal
+    outputmsgname: value
     rangeType: float
+    showports: 'False'
     start: '-16000'
     step: '100'
     stop: '16000'
@@ -88,6 +90,29 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1040, 128.0]
+    rotation: 0
+    state: true
+- name: variable_qtgui_range_0
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    outputmsgname: value
+    rangeType: float
+    showports: 'False'
+    start: '0'
+    step: '1'
+    stop: '100'
+    value: '50'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 560.0]
     rotation: 0
     state: true
 - name: vec_len
@@ -706,4 +731,4 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.3.0
+  grc_version: 3.10.4.0
