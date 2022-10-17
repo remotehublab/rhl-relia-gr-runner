@@ -41,9 +41,7 @@ blocks:
     label: ''
     min_len: '200'
     orient: QtCore.Qt.Horizontal
-    outputmsgname: value
     rangeType: float
-    showports: 'False'
     start: '0'
     step: '1'
     stop: '10000'
@@ -105,9 +103,7 @@ blocks:
     label: ''
     min_len: '200'
     orient: QtCore.Qt.Horizontal
-    outputmsgname: value
     rangeType: float
-    showports: 'False'
     start: '-16000'
     step: '100'
     stop: '16000'
@@ -130,22 +126,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1040, 128.0]
-    rotation: 0
-    state: true
-- name: variable_qtgui_label_0
-  id: variable_qtgui_label
-  parameters:
-    comment: ''
-    formatter: None
-    gui_hint: ''
-    label: Hola
-    type: int
-    value: amplitude
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [408, 704.0]
     rotation: 0
     state: true
 - name: vec_len
@@ -708,7 +688,6 @@ blocks:
     label7: ''
     label8: ''
     label9: ''
-    legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
     name: '""'
@@ -764,4 +743,3 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.4.0

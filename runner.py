@@ -37,6 +37,7 @@ def main():
         'qtgui_vector_sink_f': 'relia_vector_sink_f',
         'qtgui_histogram_sink_x': 'relia_histogram_sink_x',
         'variable_qtgui_range': 'variable_relia_range',
+        'variable_qtgui_check_box': 'variable_relia_check_box',
     }
 
     for block in grc_content['blocks']:
