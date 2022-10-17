@@ -33,6 +33,46 @@ options:
     state: enabled
 
 blocks:
+- name: amplitude
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    outputmsgname: value
+    rangeType: float
+    showports: 'False'
+    start: '0'
+    step: '1'
+    stop: '10000'
+    value: '1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 560.0]
+    rotation: 0
+    state: disabled
+- name: amplitude
+  id: variable_qtgui_check_box
+  parameters:
+    comment: ''
+    'false': '0'
+    gui_hint: ''
+    label: ''
+    'true': '1000'
+    type: int
+    value: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [464, 800.0]
+    rotation: 0
+    state: true
 - name: samp_rate
   id: variable
   parameters:
@@ -92,27 +132,20 @@ blocks:
     coordinate: [1040, 128.0]
     rotation: 0
     state: true
-- name: variable_qtgui_range_0
-  id: variable_qtgui_range
+- name: variable_qtgui_label_0
+  id: variable_qtgui_label
   parameters:
     comment: ''
+    formatter: None
     gui_hint: ''
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    outputmsgname: value
-    rangeType: float
-    showports: 'False'
-    start: '0'
-    step: '1'
-    stop: '100'
-    value: '50'
-    widget: counter_slider
+    label: Hola
+    type: int
+    value: amplitude
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 560.0]
+    coordinate: [408, 704.0]
     rotation: 0
     state: true
 - name: vec_len
@@ -202,7 +235,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '2'
+    amp: amplitude
     comment: ''
     freq: start_freq
     maxoutbuf: '0'
