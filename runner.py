@@ -8,6 +8,8 @@ import tempfile
 import argparse
 import subprocess
 
+import requests
+
 import yaml
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -44,6 +46,13 @@ def main():
             if not os.path.exists(block_yml):
                 raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
 
+    # TODO
+    uploader_base_url = 'http://localhost:6001'
+    session_id = 'my-session-id'
+    device_id = 'my-device-id'
+
+    print(f"Resetting device {device_id}")
+    print(requests.delete(uploader_base_url + f"/api/download/sessions/{session_id}/devices/{device_id}").json())
 
     with tempfile.TemporaryDirectory(prefix='relia-') as tmpdir:
         grc_filename = os.path.join(tmpdir, 'user_file.grc')
@@ -52,9 +61,9 @@ def main():
         open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
 
         open(os.path.join(tmpdir, 'relia.json'), 'w').write(json.dumps({
-            'uploader_base_url': 'http://localhost:6001', # TODO
-            'session_id': 'my-session-id', # TODO
-            'device_id': 'my-device-id', # TODO
+            'uploader_base_url': uploader_base_url,
+            'session_id': session_id,
+            'device_id': device_id,
         }))
 
         command = ['grcc', grc_filename, '-o', tmpdir]
