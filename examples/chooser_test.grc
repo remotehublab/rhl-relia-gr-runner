@@ -67,7 +67,7 @@ blocks:
     orient: Qt.QVBoxLayout
     type: int
     value: '30'
-    widget: combo_box
+    widget: radio_buttons
   states:
     bus_sink: false
     bus_source: false
