@@ -39,6 +39,7 @@ def main():
         'variable_qtgui_range': 'variable_relia_range',
         'variable_qtgui_check_box': 'variable_relia_check_box',
         'variable_qtgui_push_button': 'variable_relia_push_button',
+        'variable_qtgui_chooser': 'variable_relia_chooser',
     }
 
     for block in grc_content['blocks']:
