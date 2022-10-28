@@ -50,23 +50,23 @@ blocks:
   parameters:
     comment: ''
     gui_hint: ''
-    label: ''
-    label0: 30 Hz
-    label1: 90 Hz
+    label: label
+    label0: Cosine
+    label1: Sqaure
     label2: ''
     label3: ''
     label4: ''
     labels: '[]'
     num_opts: '2'
-    option0: '30'
-    option1: '90'
+    option0: '103'
+    option1: '101'
     option2: '2'
     option3: '3'
     option4: '4'
     options: '[0, 1, 2]'
     orient: Qt.QVBoxLayout
     type: int
-    value: '30'
+    value: '103'
     widget: radio_buttons
   states:
     bus_sink: false
@@ -84,7 +84,7 @@ blocks:
     pressed: '1'
     released: '0'
     type: int
-    value: '0'
+    value: '1'
   states:
     bus_sink: false
     bus_source: false
@@ -97,16 +97,16 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: 1*variable_qtgui_push_button_0
+    amp: '1'
     comment: ''
-    freq: variable_qtgui_chooser_0
+    freq: '30'
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
     type: complex
-    waveform: analog.GR_SIN_WAVE
+    waveform: variable_qtgui_chooser_0
   states:
     bus_sink: false
     bus_source: false
