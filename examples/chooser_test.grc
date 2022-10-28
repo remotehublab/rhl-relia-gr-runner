@@ -80,7 +80,7 @@ blocks:
   parameters:
     comment: ''
     gui_hint: ''
-    label: ''
+    label: Hola
     pressed: '1'
     released: '0'
     type: int
