@@ -97,7 +97,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '1'
+    amp: 1*variable_qtgui_push_button_0
     comment: ''
     freq: '30'
     maxoutbuf: '0'
