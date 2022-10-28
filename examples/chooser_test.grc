@@ -51,8 +51,8 @@ blocks:
     comment: ''
     gui_hint: ''
     label: label
-    label0: Cosine
-    label1: Sqaure
+    label0: Square
+    label1: Cosine
     label2: ''
     label3: ''
     label4: ''
@@ -72,7 +72,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [168, 196.0]
+    coordinate: [144, 196.0]
     rotation: 0
     state: true
 - name: variable_qtgui_push_button_0
@@ -130,7 +130,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 140.0]
+    coordinate: [608, 124.0]
     rotation: 0
     state: true
 - name: qtgui_eye_sink_x_0
@@ -323,7 +323,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 132.0]
+    coordinate: [800, 116.0]
     rotation: 0
     state: true
 
@@ -334,4 +334,3 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.4.0
