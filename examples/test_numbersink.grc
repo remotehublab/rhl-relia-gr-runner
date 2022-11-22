@@ -45,6 +45,25 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
+- name: analog_noise_source_x_0
+  id: analog_noise_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '0.1'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_type: analog.GR_GAUSSIAN
+    seed: '0'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 332.0]
+    rotation: 0
+    state: true
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -58,7 +77,7 @@ blocks:
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
-    type: float
+    type: complex
     waveform: analog.GR_SIN_WAVE
   states:
     bus_sink: false
@@ -67,23 +86,20 @@ blocks:
     coordinate: [232, 244.0]
     rotation: 0
     state: enabled
-- name: blocks_delay_0
-  id: blocks_delay
+- name: blocks_complex_to_float_0
+  id: blocks_complex_to_float
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    delay: '40'
     maxoutbuf: '0'
     minoutbuf: '0'
-    num_ports: '1'
-    type: float
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 380.0]
+    coordinate: [656, 100.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -96,7 +112,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_second: samp_rate
-    type: float
+    type: complex
     vlen: '1'
   states:
     bus_sink: false
@@ -242,7 +258,7 @@ blocks:
     tr_mode: qtgui.TRIG_MODE_FREE
     tr_slope: qtgui.TRIG_SLOPE_POS
     tr_tag: '""'
-    type: float
+    type: complex
     update_time: '0.10'
     width1: '1'
     width10: '1'
@@ -267,10 +283,10 @@ blocks:
     state: true
 
 connections:
-- [analog_sig_source_x_0, '0', blocks_delay_0, '0']
+- [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '1']
 - [analog_sig_source_x_0, '0', blocks_throttle_0, '0']
-- [blocks_delay_0, '0', qtgui_time_sink_x_0, '1']
-- [blocks_throttle_0, '0', qtgui_number_sink_0, '0']
+- [blocks_complex_to_float_0, '0', qtgui_number_sink_0, '0']
+- [blocks_throttle_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
 
 metadata:
