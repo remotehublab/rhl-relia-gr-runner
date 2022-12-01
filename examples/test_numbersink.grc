@@ -61,9 +61,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 332.0]
+    coordinate: [424, 324.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -86,6 +86,28 @@ blocks:
     coordinate: [232, 244.0]
     rotation: 0
     state: enabled
+- name: analog_sig_source_x_1
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '2'
+    comment: ''
+    freq: '150'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '-1'
+    phase: '0'
+    samp_rate: samp_rate
+    type: complex
+    waveform: analog.GR_SQR_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 444.0]
+    rotation: 0
+    state: disabled
 - name: blocks_complex_to_float_0
   id: blocks_complex_to_float
   parameters:
@@ -119,6 +141,23 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [480, 236.0]
+    rotation: 0
+    state: enabled
+- name: eye_plot_0
+  id: eye_plot
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    nop: '1024'
+    samp_rate: '32000'
+    time_delay: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [840, 220.0]
     rotation: 0
     state: enabled
 - name: qtgui_number_sink_0
@@ -183,7 +222,7 @@ blocks:
     bus_structure: null
     coordinate: [808, 104.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -212,9 +251,9 @@ blocks:
     color8: dark red
     color9: dark green
     comment: ''
-    ctrlpanel: 'False'
+    ctrlpanel: 'True'
     entags: 'True'
-    grid: 'False'
+    grid: 'True'
     gui_hint: ''
     label1: Signal 1
     label10: Signal 10
@@ -238,7 +277,7 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '2'
+    nconnections: '1'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
@@ -280,11 +319,11 @@ blocks:
     bus_structure: null
     coordinate: [688, 316.0]
     rotation: 0
-    state: true
+    state: disabled
 
 connections:
-- [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '1']
 - [analog_sig_source_x_0, '0', blocks_throttle_0, '0']
+- [blocks_complex_to_float_0, '0', eye_plot_0, '0']
 - [blocks_complex_to_float_0, '0', qtgui_number_sink_0, '0']
 - [blocks_throttle_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
