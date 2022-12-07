@@ -22,7 +22,9 @@ DEFAULT_HIER_BLOCK_LIB_DIR = os.path.expanduser('~/.grc_gnuradio')
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=pathlib.Path, required=True)
-    parser.add_argument('--host')
+    parser.add_argument('--host', default="localhost")
+    parser.add_argument('--device-id', default='my-device-id')
+    parser.add_argument('--session-id', default='my-session-id')
     args = parser.parse_args()
 
     grc_content = yaml.load(open(args.input).read(), Loader=Loader)
@@ -53,9 +55,9 @@ def main():
                 raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
 
     # TODO
-    uploader_base_url = f'http://{args.host or "localhost"}:6001'
-    session_id = 'my-session-id'
-    device_id = 'my-device-id'
+    uploader_base_url = f'http://{args.host}:6001'
+    session_id = args.session_id
+    device_id = args.device_id
 
     print(f"Resetting device {device_id}")
     print(requests.delete(uploader_base_url + f"/api/download/sessions/{session_id}/devices/{device_id}").json())
