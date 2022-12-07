@@ -23,6 +23,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', type=pathlib.Path, required=True)
     parser.add_argument('--host', default="localhost")
+    parser.add_argument('--base-url', default=None)
     parser.add_argument('--device-id', default='my-device-id')
     parser.add_argument('--session-id', default='my-session-id')
     args = parser.parse_args()
@@ -55,7 +56,10 @@ def main():
                 raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
 
     # TODO
-    uploader_base_url = f'http://{args.host}:6001'
+    if args.base_url:
+        uploader_base_url = args.base_url
+    else:
+        uploader_base_url = f'http://{args.host}:6001'
     session_id = args.session_id
     device_id = args.device_id
 
