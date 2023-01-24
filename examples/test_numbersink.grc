@@ -61,9 +61,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 324.0]
+    coordinate: [344, 364.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -105,9 +105,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 444.0]
+    coordinate: [456, 492.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_complex_to_float_0
   id: blocks_complex_to_float
   parameters:
@@ -277,7 +277,7 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '1'
+    nconnections: '3'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
@@ -319,10 +319,12 @@ blocks:
     bus_structure: null
     coordinate: [688, 316.0]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
+- [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '1']
 - [analog_sig_source_x_0, '0', blocks_throttle_0, '0']
+- [analog_sig_source_x_1, '0', qtgui_time_sink_x_0, '2']
 - [blocks_complex_to_float_0, '0', eye_plot_0, '0']
 - [blocks_complex_to_float_0, '0', qtgui_number_sink_0, '0']
 - [blocks_throttle_0, '0', blocks_complex_to_float_0, '0']
