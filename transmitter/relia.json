@@ -1,0 +1,5 @@
+{
+	"uploader_base_url": "http://localhost:6001",
+        "session_id": "my-session-id",
+        "device_id": "my-device-id"
+}
