@@ -6,6 +6,8 @@ class Config:
     PASSWORD = os.environ.get('PASSWORD')
     DATA_UPLOADER_BASE_URL = os.environ.get('DATA_UPLOADER_BASE_URL')
     SCHEDULER_BASE_URL = os.environ.get('SCHEDULER_BASE_URL')
+    DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
