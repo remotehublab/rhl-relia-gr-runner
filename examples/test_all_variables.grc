@@ -45,6 +45,25 @@ blocks:
     coordinate: [184, 12]
     rotation: 0
     state: enabled
+- name: analog_noise_source_x_0
+  id: analog_noise_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '0'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_type: analog.GR_GAUSSIAN
+    seed: '0'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 364.0]
+    rotation: 0
+    state: true
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -52,7 +71,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: '73'
+    freq: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -64,7 +83,44 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [88, 244.0]
+    coordinate: [40, 244.0]
+    rotation: 0
+    state: true
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 276.0]
+    rotation: 0
+    state: true
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: '45'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 364.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -83,7 +139,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [240, 276.0]
+    coordinate: [360, 284.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -103,11 +159,11 @@ blocks:
     alpha9: '1.0'
     autoscale: 'False'
     axislabels: 'True'
-    color1: magenta
+    color1: blue
     color10: dark blue
-    color2: cyan
-    color3: green
-    color4: black
+    color2: dark blue
+    color3: red
+    color4: dark red
     color5: cyan
     color6: magenta
     color7: yellow
@@ -139,14 +195,14 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: TTT
-    nconnections: '1'
+    name: RELIA MEETING
+    nconnections: '2'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
-    style1: '1'
+    style1: '0'
     style10: '1'
-    style2: '1'
+    style2: '2'
     style3: '1'
     style4: '1'
     style5: '1'
@@ -173,19 +229,23 @@ blocks:
     width8: '1'
     width9: '1'
     ylabel: Amplitude
-    ymax: '1'
-    ymin: '-1'
-    yunit: '""'
+    ymax: '2'
+    ymin: '-2'
+    yunit: '"sdasd"'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [392, 276.0]
+    coordinate: [584, 272.0]
     rotation: 0
     state: true
 
 connections:
-- [analog_sig_source_x_0, '0', blocks_throttle_0, '0']
+- [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
+- [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
+- [blocks_add_xx_0, '0', blocks_throttle_0, '0']
+- [blocks_delay_0, '0', qtgui_time_sink_x_0, '1']
+- [blocks_throttle_0, '0', blocks_delay_0, '0']
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
 
 metadata:
