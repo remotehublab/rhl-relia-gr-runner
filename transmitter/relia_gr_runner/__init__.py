@@ -29,30 +29,36 @@ def create_app(config_name: str = 'default'):
         print("*                                                         *")
         print("*               I M P O R T A N T                         *")
         print("*                                                         *")
-        print("*  You must pass --with-threads when testing transmitter  *")
+        print("* You must pass --with-threads when testing transmitter   *")
         print("*                                                         *")
         print("***********************************************************")
 
     with app.app_context():
         global THREAD_EVENT
+        global TERMINAL_FLAG
         global SCHEDULER_BASE_URL
+        global DEVICE_ID
+        global PASSWORD
         # NOTE: Cannot use environment variable if both the transmitter and receiver are operating on the same device
         # DEVICE_ID = current_app.config['DEVICE_ID']
-        DEVICE_ID = 'uw-s1i1:t'
+        DEVICE_ID = 'uw-s1i1:r'
         PASSWORD = current_app.config['PASSWORD']
         SCHEDULER_BASE_URL = current_app.config['SCHEDULER_BASE_URL']
         DATA_UPLOADER_BASE_URL = current_app.config['DATA_UPLOADER_BASE_URL']
         DEFAULT_HIER_BLOCK_LIB_DIR = os.environ.get('RELIA_GR_BLOCKS_PATH')
         THREAD_EVENT = threading.Event()
+        TERMINAL_FLAG = True
         x = {}
         d = 1
 
-    while(True):
+    while (True):
          d += 1
          print("Transmitter requesting assignment...")
          device_data = requests.get(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter?max_seconds=5", headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
          if device_data.get('taskIdentifier'):
+              init_time = time.perf_counter()
               THREAD_EVENT.clear()
+              TERMINAL_FLAG = True
               x["thread{0}".format(d)] = threading.Thread(target=thread_function, args=(device_data.get('taskIdentifier'),), daemon=True)
               x["thread{0}".format(d)].start()
               grc_content = yaml.load(device_data.get('grcTransmitterFileContent'), Loader=Loader)
@@ -99,55 +105,64 @@ def create_app(config_name: str = 'default'):
               }))
 
               command = ['grcc', grc_filename, '-o', tmpdir.name]
-              if not x["thread{0}".format(d)].is_alive():
-                   print("Task being purged due to deletion")
+              if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
+                   early_terminate(device_data.get('taskIdentifier'))
+                   TERMINAL_FLAG = False
+
+              if TERMINAL_FLAG:
+                   try:
+                        p = subprocess.Popen(command, cwd=tmpdir.name)
+                        while p.poll() is None:
+                             if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
+                                  p.terminate()
+                                  early_terminate(device_data.get('taskIdentifier'))
+                                  TERMINAL_FLAG = False
+                                  break
+                   except subprocess.CalledProcessError as err:
+                        print("Error processing grcc:", file=sys.stderr)
+                        print("", file=sys.stderr)
+                        print(f" $ {' '.join(command)}", file=sys.stderr)
+                        print(err.output, file=sys.stderr)
+                        print(" $", file=sys.stderr)
+                        print("", file=sys.stderr)
+
+                        tmp_directory = pathlib.Path(tempfile.gettempdir())
+                        error_tmp_directory = tmp_directory / f"relia-error-tmp-{time.time()}"
+
+                        os.mkdir(error_tmp_directory)
+                        shutil.copy(os.path.join(tmpdir, 'user_file.grc'), error_tmp_directory)
+                        shutil.copy(os.path.join(tmpdir, 'relia.json'), error_tmp_directory)
+                        print(f"You can reproduce it going to the directory {error_tmp_directory} and running the command:", file=sys.stderr)
+                        print("", file=sys.stderr)
+                        print(f" $ cd {error_tmp_directory}", file=sys.stderr)
+                        print(f" $ grcc {error_tmp_directory / 'user_file.grc'} -o {error_tmp_directory}", file=sys.stderr)
+                        print("", file=sys.stderr)
+                        raise
+
+              if TERMINAL_FLAG:
+                   p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
+                   while p.poll() is None:
+                        if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
+                             p.terminate()
+                             early_terminate(device_data.get('taskIdentifier'))
+                             TERMINAL_FLAG = False
+                             break
+
+              if TERMINAL_FLAG:
+                   THREAD_EVENT.set()
+                   tmpdir.cleanup()
+                   print("Transmitter completing task")
                    device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter/" + device_data.get('taskIdentifier'), headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
                    print(device_data.get('status'))
-              try:
-                   p = subprocess.Popen(command, cwd=tmpdir.name)
-                   while p.poll() is None:
-                        if not x["thread{0}".format(d)].is_alive():
-                             p.terminate()
-                             print("Task being purged due to deletion")
-                             device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter/" + device_data.get('taskIdentifier'), headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
-                             print(device_data.get('status'))
-              except subprocess.CalledProcessError as err:
-                   print("Error processing grcc:", file=sys.stderr)
-                   print("", file=sys.stderr)
-                   print(f" $ {' '.join(command)}", file=sys.stderr)
-                   print(err.output, file=sys.stderr)
-                   print(" $", file=sys.stderr)
-                   print("", file=sys.stderr)
-
-                   tmp_directory = pathlib.Path(tempfile.gettempdir())
-                   error_tmp_directory = tmp_directory / f"relia-error-tmp-{time.time()}"
-
-                   os.mkdir(error_tmp_directory)
-                   shutil.copy(os.path.join(tmpdir, 'user_file.grc'), error_tmp_directory)
-                   shutil.copy(os.path.join(tmpdir, 'relia.json'), error_tmp_directory)
-                   print(f"You can reproduce it going to the directory {error_tmp_directory} and running the command:", file=sys.stderr)
-                   print("", file=sys.stderr)
-                   print(f" $ cd {error_tmp_directory}", file=sys.stderr)
-                   print(f" $ grcc {error_tmp_directory / 'user_file.grc'} -o {error_tmp_directory}", file=sys.stderr)
-                   print("", file=sys.stderr)
-                   raise
-
-              p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
-              while p.poll() is None:
-                   if not x["thread{0}".format(d)].is_alive():
-                        p.terminate()
-                        print("Task being purged due to deletion")
-                        device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter/" + device_data.get('taskIdentifier'), headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
-                        print(device_data.get('status'))
-              THREAD_EVENT.set()
-              tmpdir.cleanup()
-              print("Transmitter completing task")
-              device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter/" + device_data.get('taskIdentifier'), headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
-              print(device_data.get('status'))
          else:
               print("Previous assignment failed; do nothing")
 
     return app
+
+def early_terminate(task_identifier):
+    print("Task being purged due to deletion")
+    device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/transmitter/" + task_identifier, headers={'relia-device': DEVICE_ID, 'relia-password': PASSWORD}, timeout=(30,30)).json()
+    print(device_data.get('message'))
 
 def thread_function(task_identifier):
     while not THREAD_EVENT.is_set():
