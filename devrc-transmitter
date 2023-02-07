@@ -1,5 +1,5 @@
 export FLASK_DEBUG=1
-export FLASK_RUN_PORT=6006
+export FLASK_RUN_PORT=6007
 export FLASK_APP=autoapp
 export DEVICE_ID='uw-s1i1:t'
 export DEVICE_TYPE='transmitter'

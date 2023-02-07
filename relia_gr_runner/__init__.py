@@ -30,45 +30,19 @@ def create_app(config_name: str = 'default'):
         Process tasks
         """
         from .scheduler import SchedulerClient
-        global TERMINAL_FLAG
-        global SCHEDULER_BASE_URL
-        global DEVICE_ID
-        DEVICE_ID = current_app.config['DEVICE_ID']
+
+        device_id = current_app.config['DEVICE_ID']
         password = current_app.config['PASSWORD']
+        device_type = current_app.config['DEVICE_TYPE']
+
         SCHEDULER_BASE_URL = current_app.config['SCHEDULER_BASE_URL']
         DATA_UPLOADER_BASE_URL = current_app.config['DATA_UPLOADER_BASE_URL']
         DEFAULT_HIER_BLOCK_LIB_DIR = os.environ.get('RELIA_GR_BLOCKS_PATH')
         TERMINAL_FLAG = True
 
         thread_event = threading.Event()
-        device_type = current_app.config['DEVICE_TYPE']
-        x = {}
-        d = 1
-
         scheduler = SchedulerClient()
-
-        while (True):
-             d += 1
-             print(f"{device_type.title()} requesting assignment...")
-             device_data = scheduler.get_assignments()
-             if device_data.get('taskIdentifier'):
-                  init_time = time.perf_counter()
-                  thread_event.clear()
-                  TERMINAL_FLAG = True
-                  x["thread{0}".format(d)] = threading.Thread(target=thread_function, args=(device_data.get('taskIdentifier'), thread_event), daemon=True)
-                  x["thread{0}".format(d)].start()
-                  if device_type == 'receiver':
-                      grc_file_content = device_data.get('grcReceiverFileContent')
-                  elif device_type == 'transmitter':
-                      grc_file_content = device_data.get('grcTransmitterFileContent')
-                  else:
-                      raise Exception(f"Unsupported type: {device_type}")
-                  grc_content = yaml.load(grc_file_content, Loader=Loader)
-                  target_filename = 'target_file'
-                  grc_content['options']['parameters']['id'] = target_filename
-                  grc_content['options']['parameters']['generate_options'] = 'no_gui'
-
-                  conversions = {
+        conversions = {
                        'qtgui_time_sink_x': 'relia_time_sink_x',
                        'qtgui_const_sink_x': 'relia_const_sink_x',
                        'qtgui_vector_sink_f': 'relia_vector_sink_f',
@@ -79,7 +53,25 @@ def create_app(config_name: str = 'default'):
                        'variable_qtgui_chooser': 'variable_relia_chooser',
                        'qtgui_number_sink': 'relia_number_sink',      
                        'eye_plot': 'relia_eye_plot_x',      
-                  }
+                      }
+
+        while (True):
+             print(f"{device_type.title()} requesting assignment...")
+             device_data = scheduler.get_assignments()
+             if device_data.taskIdentifier:
+                  init_time = time.perf_counter()
+                  thread_event.clear()
+                  TERMINAL_FLAG = True
+                  x = threading.Thread(target=thread_function, args=(scheduler, device_data.taskIdentifier, thread_event), daemon=True)
+                  x.start()
+                  if device_type == 'receiver' or device_type == 'transmitter':
+                      grc_file_content = device_data.grcFileContent
+                  else:
+                      raise Exception(f"Unsupported type: {device_type}")
+                  grc_content = yaml.load(grc_file_content, Loader=Loader)
+                  target_filename = 'target_file'
+                  grc_content['options']['parameters']['id'] = target_filename
+                  grc_content['options']['parameters']['generate_options'] = 'no_gui'
 
                   for block in grc_content['blocks']:
                        if block['id'] in conversions:
@@ -89,10 +81,10 @@ def create_app(config_name: str = 'default'):
                                  raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
 
                   uploader_base_url = DATA_UPLOADER_BASE_URL
-                  session_id = device_data.get('sessionIdentifier')
+                  session_id = device_data.sessionIdentifier
 
-                  print(f"Resetting device {DEVICE_ID}")
-                  print(requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{DEVICE_ID}").json())
+                  print(f"Resetting device {device_id}")
+                  print(requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}").json())
 
                   tmpdir = tempfile.TemporaryDirectory(prefix='relia-', ignore_cleanup_errors=True)
                   grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
@@ -103,21 +95,21 @@ def create_app(config_name: str = 'default'):
                   open(os.path.join(tmpdir.name, 'relia.json'), 'w').write(json.dumps({
                        'uploader_base_url': uploader_base_url,
                        'session_id': session_id,
-                       'device_id': DEVICE_ID,
+                       'device_id': device_id,
                   }))
 
                   command = ['grcc', grc_filename, '-o', tmpdir.name]
-                  if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
-                       early_terminate(device_data.get('taskIdentifier'))
+                  if not x.is_alive() or time.perf_counter() - init_time > 120:
+                       early_terminate(scheduler, device_data.taskIdentifier)
                        TERMINAL_FLAG = False
 
                   if TERMINAL_FLAG:
                        try:
                             p = subprocess.Popen(command, cwd=tmpdir.name)
                             while p.poll() is None:
-                                 if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
+                                 if not x.is_alive() or time.perf_counter() - init_time > 120:
                                       p.terminate()
-                                      early_terminate(device_data.get('taskIdentifier'))
+                                      early_terminate(scheduler, device_data.taskIdentifier)
                                       TERMINAL_FLAG = False
                                       break
                        except subprocess.CalledProcessError as err:
@@ -144,9 +136,9 @@ def create_app(config_name: str = 'default'):
                   if TERMINAL_FLAG:
                        p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
                        while p.poll() is None:
-                            if not x["thread{0}".format(d)].is_alive() or time.perf_counter() - init_time > 120:
+                            if not x.is_alive() or time.perf_counter() - init_time > 120:
                                  p.terminate()
-                                 early_terminate(device_data.get('taskIdentifier'))
+                                 early_terminate(scheduler, device_data.taskIdentifier)
                                  TERMINAL_FLAG = False
                                  break
 
@@ -154,21 +146,18 @@ def create_app(config_name: str = 'default'):
                        thread_event.set()
                        tmpdir.cleanup()
                        print(f"{device_type.title()} completing task")
-                       device_data = requests.post(SCHEDULER_BASE_URL + f"scheduler/devices/tasks/{device_type}/" + device_data.get('taskIdentifier'), headers={'relia-device': DEVICE_ID, 'relia-password': password}, timeout=(30,30)).json()
-                       print(device_data.get('status'))
+                       scheduler.complete_assignments(device_data.taskIdentifier)
              else:
                   print("Previous assignment failed; do nothing")
 
     return app
 
-def early_terminate(task_identifier):
+def early_terminate(scheduler, task_identifier):
     print("Task being purged due to deletion")
-    device_data = requests.post(SCHEDULER_BASE_URL + "scheduler/devices/tasks/{current_app.config['DEVICE_TYPE']}/" + task_identifier, headers={'relia-device': DEVICE_ID, 'relia-password': current_app.config['PASSWORD']}, timeout=(30,30)).json()
-    print(device_data.get('message'))
+    scheduler.complete_assignments(task_identifier)
 
-def thread_function(task_identifier, thread_event):
+def thread_function(scheduler, task_identifier, thread_event):
     while not thread_event.is_set():
-        device_data = requests.get(SCHEDULER_BASE_URL + "scheduler/user/tasks/" + task_identifier, timeout=(30,30)).json()
-        if device_data.get('status') == "deleted":
+        if scheduler.check_assignment(task_identifier) == "deleted":
             break
         time.sleep(2)
