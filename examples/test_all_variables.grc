@@ -37,7 +37,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '32000'
+    value: '10000'
   states:
     bus_sink: false
     bus_source: false
@@ -50,7 +50,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '0'
+    amp: '.1'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -61,7 +61,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [48, 364.0]
+    coordinate: [40, 220.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_0
@@ -83,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 244.0]
+    coordinate: [32, 108.0]
     rotation: 0
     state: true
 - name: blocks_add_xx_0
@@ -101,7 +101,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 276.0]
+    coordinate: [264, 132.0]
     rotation: 0
     state: true
 - name: blocks_delay_0
@@ -120,7 +120,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 364.0]
+    coordinate: [472, 228.0]
     rotation: 0
     state: true
 - name: blocks_delay_0_0
@@ -139,7 +139,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 484.0]
+    coordinate: [472, 340.0]
     rotation: 0
     state: true
 - name: blocks_throttle_0
@@ -158,7 +158,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 284.0]
+    coordinate: [352, 148.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -183,7 +183,7 @@ blocks:
     color2: dark blue
     color3: blue
     color4: red
-    color5: cyan
+    color5: dark green
     color6: magenta
     color7: yellow
     color8: dark red
@@ -191,22 +191,22 @@ blocks:
     comment: ''
     ctrlpanel: 'False'
     entags: 'True'
-    grid: 'False'
+    grid: 'True'
     gui_hint: ''
-    label1: january
+    label1: Signal 1 - I
     label10: Signal 10
-    label2: february
-    label3: march
-    label4: april
-    label5: may
-    label6: june
+    label2: Signal 1 - Q
+    label3: Signal 2 - I
+    label4: Signal 2 - Q
+    label5: Signal 3 - I
+    label6: Signal 3 - Q
     label7: Signal 7
     label8: Signal 8
     label9: Signal 9
     legend: 'True'
-    marker1: '-1'
+    marker1: '3'
     marker10: '-1'
-    marker2: '-1'
+    marker2: '1'
     marker3: '-1'
     marker4: '-1'
     marker5: '-1'
@@ -214,17 +214,17 @@ blocks:
     marker7: '-1'
     marker8: '-1'
     marker9: '-1'
-    name: RELIA MEETING
+    name: RELIA FULL PARAMETERS
     nconnections: '3'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
-    style1: '0'
+    style1: '1'
     style10: '1'
     style2: '2'
-    style3: '1'
-    style4: '0'
-    style5: '1'
+    style3: '2'
+    style4: '2'
+    style5: '2'
     style6: '1'
     style7: '1'
     style8: '1'
@@ -237,7 +237,7 @@ blocks:
     tr_tag: '""'
     type: complex
     update_time: '0.10'
-    width1: '4'
+    width1: '1'
     width10: '1'
     width2: '2'
     width3: '1'
@@ -250,24 +250,24 @@ blocks:
     ylabel: Amplitude
     ymax: '2'
     ymin: '-2'
-    yunit: '"sdasd"'
+    yunit: Voltage
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [584, 272.0]
+    coordinate: [576, 132.0]
     rotation: 0
     state: true
 
 connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
+- [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '0']
 - [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
 - [blocks_add_xx_0, '0', blocks_throttle_0, '0']
 - [blocks_delay_0, '0', qtgui_time_sink_x_0, '1']
 - [blocks_delay_0_0, '0', qtgui_time_sink_x_0, '2']
 - [blocks_throttle_0, '0', blocks_delay_0, '0']
 - [blocks_throttle_0, '0', blocks_delay_0_0, '0']
-- [blocks_throttle_0, '0', qtgui_time_sink_x_0, '0']
 
 metadata:
   file_format: 1
