@@ -67,7 +67,10 @@ def create_app(config_name: str = 'default'):
                   if device_type == 'receiver' or device_type == 'transmitter':
                       grc_file_content = device_data.grcFileContent
                   else:
-                      raise Exception(f"Unsupported type: {device_type}")
+                      scheduler.error_message_delivery(device_data.taskIdentifier, f"Unsupported type: {device_type}")
+                      early_terminate(scheduler, device_data.taskIdentifier)
+                      TERMINAL_FLAG = False
+                      
                   grc_content = yaml.load(grc_file_content, Loader=Loader)
                   target_filename = 'target_file'
                   grc_content['options']['parameters']['id'] = target_filename
@@ -78,7 +81,9 @@ def create_app(config_name: str = 'default'):
                             block['id'] = conversions[block['id']]
                             block_yml = os.path.join(DEFAULT_HIER_BLOCK_LIB_DIR, f"{block['id']}.block.yml")
                             if not os.path.exists(block_yml):
-                                 raise Exception(f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
+                                 scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
+                                 early_terminate(scheduler, device_data.taskIdentifier)
+                                 TERMINAL_FLAG = False
 
                   uploader_base_url = DATA_UPLOADER_BASE_URL
                   session_id = device_data.sessionIdentifier
@@ -104,44 +109,33 @@ def create_app(config_name: str = 'default'):
                        TERMINAL_FLAG = False
 
                   if TERMINAL_FLAG:
-                       try:
-                            p = subprocess.Popen(command, cwd=tmpdir.name)
-                            while p.poll() is None:
-                                 if not x.is_alive() or time.perf_counter() - init_time > 120:
-                                      p.terminate()
-                                      early_terminate(scheduler, device_data.taskIdentifier)
-                                      TERMINAL_FLAG = False
-                                      break
-                       except subprocess.CalledProcessError as err:
-                            print("Error processing grcc:", file=sys.stderr)
-                            print("", file=sys.stderr)
-                            print(f" $ {' '.join(command)}", file=sys.stderr)
-                            print(err.output, file=sys.stderr)
-                            print(" $", file=sys.stderr)
-                            print("", file=sys.stderr)
-
-                            tmp_directory = pathlib.Path(tempfile.gettempdir())
-                            error_tmp_directory = tmp_directory / f"relia-error-tmp-{time.time()}"
-
-                            os.mkdir(error_tmp_directory)
-                            shutil.copy(os.path.join(tmpdir, 'user_file.grc'), error_tmp_directory)
-                            shutil.copy(os.path.join(tmpdir, 'relia.json'), error_tmp_directory)
-                            print(f"You can reproduce it going to the directory {error_tmp_directory} and running the command:", file=sys.stderr)
-                            print("", file=sys.stderr)
-                            print(f" $ cd {error_tmp_directory}", file=sys.stderr)
-                            print(f" $ grcc {error_tmp_directory / 'user_file.grc'} -o {error_tmp_directory}", file=sys.stderr)
-                            print("", file=sys.stderr)
-                            raise
-
-                  if TERMINAL_FLAG:
-                       p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
+                       p = subprocess.Popen(command, cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                       output, error = p.communicate()
                        while p.poll() is None:
                             if not x.is_alive() or time.perf_counter() - init_time > 120:
                                  p.terminate()
                                  early_terminate(scheduler, device_data.taskIdentifier)
                                  TERMINAL_FLAG = False
                                  break
+                       if p.returncode != 0:                 
+                            scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
+                            early_terminate(scheduler, device_data.taskIdentifier)
+                            TERMINAL_FLAG = False
 
+                  if TERMINAL_FLAG:
+                       try:
+                            p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
+                            while p.poll() is None:
+                                 if not x.is_alive() or time.perf_counter() - init_time > 120:
+                                      p.terminate()
+                                      early_terminate(scheduler, device_data.taskIdentifier)
+                                      TERMINAL_FLAG = False
+                                      break
+                       except (subprocess.CalledProcessError, Exception) as err:
+                            scheduler.error_message_delivery(device_data.taskIdentifier, err.output)
+                            early_terminate(scheduler, device_data.taskIdentifier)
+                            TERMINAL_FLAG = False
+                            
                   if TERMINAL_FLAG:
                        thread_event.set()
                        tmpdir.cleanup()
@@ -149,6 +143,7 @@ def create_app(config_name: str = 'default'):
                        scheduler.complete_assignments(device_data.taskIdentifier)
              else:
                   print("Previous assignment failed; do nothing")
+                  time.sleep(1)
 
     return app
 
