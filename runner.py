@@ -46,6 +46,7 @@ def main():
         'variable_qtgui_chooser': 'variable_relia_chooser',
         'qtgui_number_sink': 'relia_number_sink',      
         'eye_plot': 'relia_eye_plot_x',      
+        'qtgui_freq_sink_x': 'relia_freq_sink_x',
     }
 
     for block in grc_content['blocks']:
