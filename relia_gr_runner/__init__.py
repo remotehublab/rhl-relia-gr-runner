@@ -123,16 +123,16 @@ def create_app(config_name: str = 'default'):
                             TERMINAL_FLAG = False
 
                   if TERMINAL_FLAG:
-                       try:
-                            p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name)
-                            while p.poll() is None:
-                                 if not x.is_alive() or time.perf_counter() - init_time > 120:
-                                      p.terminate()
-                                      early_terminate(scheduler, device_data.taskIdentifier)
-                                      TERMINAL_FLAG = False
-                                      break
-                       except (subprocess.CalledProcessError, Exception) as err:
-                            scheduler.error_message_delivery(device_data.taskIdentifier, err.output)
+                       p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                       output, error = p.communicate()
+                       while p.poll() is None:
+                            if not x.is_alive() or time.perf_counter() - init_time > 120:
+                                 p.terminate()
+                                 early_terminate(scheduler, device_data.taskIdentifier)
+                                 TERMINAL_FLAG = False
+                                 break
+                       if p.returncode != 0:
+                            scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
                             TERMINAL_FLAG = False
                             
