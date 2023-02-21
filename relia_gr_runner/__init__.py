@@ -105,19 +105,20 @@ def create_app(config_name: str = 'default'):
                   }))
 
                   command = ['grcc', grc_filename, '-o', tmpdir.name]
-                  if not x.is_alive() or time.perf_counter() - init_time > 120:
+                  if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                        early_terminate(scheduler, device_data.taskIdentifier)
                        TERMINAL_FLAG = False
 
                   if TERMINAL_FLAG:
                        p = subprocess.Popen(command, cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                       output, error = p.communicate()
                        while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > 120:
+                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                  p.terminate()
                                  early_terminate(scheduler, device_data.taskIdentifier)
                                  TERMINAL_FLAG = False
                                  break
+
+                       output, error = p.communicate()
                        if p.returncode != 0:                 
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
@@ -125,13 +126,14 @@ def create_app(config_name: str = 'default'):
 
                   if TERMINAL_FLAG:
                        p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                       output, error = p.communicate()
                        while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > 120:
+                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                  p.terminate()
                                  early_terminate(scheduler, device_data.taskIdentifier)
                                  TERMINAL_FLAG = False
                                  break
+
+                       output, error = p.communicate()
                        if p.returncode != 0:
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
