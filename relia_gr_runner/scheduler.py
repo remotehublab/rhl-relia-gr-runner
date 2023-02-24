@@ -33,7 +33,8 @@ class SchedulerClient:
                               maxTime=device_data.get('maxTime'))
             
     def check_assignment(self, taskIdentifier):
-        device_data = requests.get(f"{self.base_url}scheduler/user/tasks/{taskIdentifier}?max_seconds=5", timeout=(30,30)).json()
+        omnipotent_user = "Omnipotent"
+        device_data = requests.get(f"{self.base_url}scheduler/user/tasks/{taskIdentifier}/{omnipotent_user}?max_seconds=5", timeout=(30,30)).json()
         return device_data.get('status')
 
     def complete_assignments(self, taskIdentifier):

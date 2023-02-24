@@ -156,6 +156,6 @@ def early_terminate(scheduler, task_identifier):
 
 def thread_function(scheduler, task_identifier, thread_event):
     while not thread_event.is_set():
-        if scheduler.check_assignment(task_identifier) == "deleted":
+        if scheduler.check_assignment(task_identifier) == "deleted" or scheduler.check_assignment(task_identifier) == "completed":
             break
         time.sleep(2)
