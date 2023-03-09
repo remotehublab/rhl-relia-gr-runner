@@ -37,7 +37,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '10000'
+    value: '32000'
   states:
     bus_sink: false
     bus_source: false
@@ -50,7 +50,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '.1'
+    amp: '.4'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -119,7 +119,7 @@ blocks:
     bus_structure: null
     coordinate: [408, 500.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -135,7 +135,7 @@ blocks:
     bus_structure: null
     coordinate: [392, 444.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_delay_0
   id: blocks_delay
   parameters:
@@ -209,7 +209,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 436.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_stream_to_vector_0_0
   id: blocks_stream_to_vector
   parameters:
@@ -227,7 +227,7 @@ blocks:
     bus_structure: null
     coordinate: [552, 508.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_throttle_0
   id: blocks_throttle
   parameters:
@@ -338,7 +338,7 @@ blocks:
     bus_structure: null
     coordinate: [608, 328.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -369,7 +369,7 @@ blocks:
     color8: '"dark red"'
     color9: '"dark green"'
     comment: ''
-    ctrlpanel: 'True'
+    ctrlpanel: 'False'
     fc: '0'
     fftsize: '1024'
     freqhalf: 'True'
@@ -419,7 +419,7 @@ blocks:
     bus_structure: null
     coordinate: [768, 252.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -435,7 +435,7 @@ blocks:
     alpha7: '1.0'
     alpha8: '1.0'
     alpha9: '1.0'
-    autoscale: 'False'
+    autoscale: 'True'
     axislabels: 'True'
     color1: green
     color10: dark blue
@@ -448,7 +448,7 @@ blocks:
     color8: dark red
     color9: dark green
     comment: ''
-    ctrlpanel: 'True'
+    ctrlpanel: 'False'
     entags: 'True'
     grid: 'True'
     gui_hint: ''
@@ -533,7 +533,7 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'True'
-    average: '1.0'
+    average: '0.05'
     color1: '"blue"'
     color10: '"dark blue"'
     color2: '"red"'
@@ -561,7 +561,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     name: '""'
-    nconnections: '1'
+    nconnections: '2'
     ref_level: '0'
     showports: 'False'
     update_time: '0.10'
@@ -590,7 +590,7 @@ blocks:
     bus_structure: null
     coordinate: [768, 352.0]
     rotation: 0
-    state: disabled
+    state: enabled
 
 connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
@@ -608,6 +608,7 @@ connections:
 - [blocks_multiply_const_vxx_0, '0', blocks_complex_to_mag_0, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_delay_0_0, '0']
 - [blocks_stream_to_vector_0, '0', qtgui_vector_sink_f_0, '0']
+- [blocks_stream_to_vector_0_0, '0', qtgui_vector_sink_f_0, '1']
 - [blocks_throttle_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_throttle_0, '0', blocks_delay_0, '0']
 - [blocks_throttle_0, '0', blocks_multiply_const_vxx_0, '0']
