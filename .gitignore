@@ -1,5 +1,8 @@
 env
 examples/*.py
+.DS_Store
+*.swp
+*.swo
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

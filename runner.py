@@ -16,6 +16,8 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
+from werkzeug.utils import secure_filename
+
 # From gnuradio.core.Constants
 DEFAULT_HIER_BLOCK_LIB_DIR = os.path.expanduser('~/.grc_gnuradio')
 
@@ -71,6 +73,11 @@ def main():
         grc_filename = os.path.join(tmpdir, 'user_file.grc')
         py_filename = os.path.join(tmpdir, f'{target_filename}.py')
 
+        for block in grc_content['blocks']:
+            if block['id'] == 'blocks_file_sink':
+                secured_filename = secure_filename(block['parameters']['file'])
+                block['parameters']['file'] = os.path.join(tmpdir, 'files', secured_filename)
+
         open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
 
         open(os.path.join(tmpdir, 'relia.json'), 'w').write(json.dumps({
@@ -78,6 +85,11 @@ def main():
             'session_id': session_id,
             'device_id': device_id,
         }))
+
+        # Create the "files" directory
+        os.mkdir(os.path.join(tmpdir, "files"))
+
+        # TODO: at some point copy the INPUT files (if any)
 
         command = ['grcc', grc_filename, '-o', tmpdir]
 
