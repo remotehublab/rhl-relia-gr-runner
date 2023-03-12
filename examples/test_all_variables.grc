@@ -86,6 +86,28 @@ blocks:
     coordinate: [32, 108.0]
     rotation: 0
     state: true
+- name: analog_sig_source_x_1
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: ''
+    freq: '5000'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [32, 316.0]
+    rotation: 0
+    state: true
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -102,6 +124,24 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [264, 132.0]
+    rotation: 0
+    state: true
+- name: blocks_add_xx_0_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 284.0]
     rotation: 0
     state: true
 - name: blocks_complex_to_float_0
@@ -247,6 +287,25 @@ blocks:
     coordinate: [352, 148.0]
     rotation: 0
     state: true
+- name: blocks_throttle_0_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 276.0]
+    rotation: 0
+    state: true
 - name: qtgui_const_sink_x_0
   id: qtgui_const_sink_x
   parameters:
@@ -336,7 +395,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [608, 328.0]
+    coordinate: [744, 244.0]
     rotation: 0
     state: disabled
 - name: qtgui_freq_sink_x_0
@@ -355,7 +414,7 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'True'
-    average: '0.05'
+    average: '0.1'
     axislabels: 'True'
     bw: samp_rate
     color1: '"dark blue"'
@@ -378,7 +437,7 @@ blocks:
     label: Relative Gain
     label1: Channel 1
     label10: ''''''
-    label2: ''''''
+    label2: Channel 2
     label3: ''''''
     label4: ''''''
     label5: ''''''
@@ -417,9 +476,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 252.0]
+    coordinate: [792, 348.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -516,7 +575,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 132.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_vector_sink_f_0
   id: qtgui_vector_sink_f
   parameters:
@@ -547,9 +606,9 @@ blocks:
     comment: ''
     grid: 'False'
     gui_hint: ''
-    label1: ''
+    label1: Test showcase
     label10: ''
-    label2: ''
+    label2: Test Panel
     label3: ''
     label4: ''
     label5: ''
@@ -588,15 +647,18 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 352.0]
+    coordinate: [776, 452.0]
     rotation: 0
     state: enabled
 
 connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
+- [analog_noise_source_x_0, '0', blocks_add_xx_0_0, '0']
 - [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '0']
 - [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
+- [analog_sig_source_x_1, '0', blocks_add_xx_0_0, '1']
 - [blocks_add_xx_0, '0', blocks_throttle_0, '0']
+- [blocks_add_xx_0_0, '0', blocks_throttle_0_0, '0']
 - [blocks_complex_to_float_0, '0', blocks_stream_to_vector_0_0, '0']
 - [blocks_complex_to_mag_0, '0', blocks_stream_to_vector_0, '0']
 - [blocks_delay_0, '0', qtgui_const_sink_x_0, '0']
@@ -611,7 +673,7 @@ connections:
 - [blocks_stream_to_vector_0_0, '0', qtgui_vector_sink_f_0, '1']
 - [blocks_throttle_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_throttle_0, '0', blocks_delay_0, '0']
-- [blocks_throttle_0, '0', blocks_multiply_const_vxx_0, '0']
+- [blocks_throttle_0_0, '0', blocks_multiply_const_vxx_0, '0']
 
 metadata:
   file_format: 1
