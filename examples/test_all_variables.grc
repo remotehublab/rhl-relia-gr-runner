@@ -575,7 +575,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 132.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_vector_sink_f_0
   id: qtgui_vector_sink_f
   parameters:
