@@ -37,7 +37,15 @@ def create_app(config_name: str = 'default'):
 
         SCHEDULER_BASE_URL = current_app.config['SCHEDULER_BASE_URL']
         DATA_UPLOADER_BASE_URL = current_app.config['DATA_UPLOADER_BASE_URL']
-        DEFAULT_HIER_BLOCK_LIB_DIR = os.environ.get('RELIA_GR_BLOCKS_PATH')
+        default_hier_block_lib_dir = os.environ.get('RELIA_GR_BLOCKS_PATH')
+        if not default_hier_block_lib_dir:
+            default_hier_block_lib_dir = os.path.expanduser("~/.grc_gnuradio")
+        
+        if not os.path.exists(default_hier_block_lib_dir):
+            print(f"Error: RELIA_GR_BLOCKS_PATH not properly configured, path: {default_hier_block_lib_dir} not found.", file=sys.stderr)
+            sys.exit(1)
+
+
         TERMINAL_FLAG = True
 
         thread_event = threading.Event()
@@ -85,7 +93,7 @@ def create_app(config_name: str = 'default'):
                   for block in grc_content['blocks']:
                        if block['id'] in conversions:
                             block['id'] = conversions[block['id']]
-                            block_yml = os.path.join(DEFAULT_HIER_BLOCK_LIB_DIR, f"{block['id']}.block.yml")
+                            block_yml = os.path.join(default_hier_block_lib_dir, f"{block['id']}.block.yml")
                             if not os.path.exists(block_yml):
                                  scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
                                  early_terminate(scheduler, device_data.taskIdentifier)
