@@ -59,6 +59,11 @@ def create_app(config_name: str = 'default'):
         while (True):
              print(f"{device_type.title()} requesting assignment...")
              device_data = scheduler.get_assignments()
+             if not device_data:
+                 print(f"Error trying to get assignments. Waiting a bit...")
+                 time.sleep(5)
+                 continue
+
              if device_data.taskIdentifier:
                   init_time = time.perf_counter()
                   thread_event.clear()

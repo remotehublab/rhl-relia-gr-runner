@@ -1,5 +1,6 @@
 import requests
 import time
+import traceback
 from typing import NamedTuple
 from datetime import datetime
 
@@ -25,6 +26,7 @@ class SchedulerClient:
         except Exception as e:
             if str(e)[0] == '5':
                 time.sleep(2)
+            traceback.print_exc()
             return None
         else:
             return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
