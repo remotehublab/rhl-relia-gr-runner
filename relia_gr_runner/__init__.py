@@ -36,14 +36,13 @@ def create_app(config_name: str = 'default'):
         password = current_app.config['PASSWORD']
         device_type = current_app.config['DEVICE_TYPE']
 
-        SCHEDULER_BASE_URL = current_app.config['SCHEDULER_BASE_URL']
-        DATA_UPLOADER_BASE_URL = current_app.config['DATA_UPLOADER_BASE_URL']
+        uploader_base_url = current_app.config['DATA_UPLOADER_BASE_URL']
         default_hier_block_lib_dir = os.environ.get('RELIA_GR_BLOCKS_PATH')
         if not default_hier_block_lib_dir:
             default_hier_block_lib_dir = os.path.expanduser("~/.grc_gnuradio")
         
         if not os.path.exists(default_hier_block_lib_dir):
-            print(f"Error: RELIA_GR_BLOCKS_PATH not properly configured, path: {default_hier_block_lib_dir} not found.", file=sys.stderr)
+            print(f"Error: RELIA_GR_BLOCKS_PATH not properly configured, path: {default_hier_block_lib_dir} not found.", file=sys.stderr, flush=True)
             sys.exit(1)
 
 
@@ -65,111 +64,117 @@ def create_app(config_name: str = 'default'):
                        'qtgui_freq_sink_x': 'relia_freq_sink_x',
                       }
 
-        while (True):
-             print(f"{device_type.title()} requesting assignment...")
-             device_data = scheduler.get_assignments()
-             if not device_data:
-                 print(f"Error trying to get assignments. Waiting a bit...")
-                 time.sleep(5)
-                 continue
+        while True:
+             print(f"[{time.asctime()}] {device_type.title()} requesting assignment...", flush=True)
+             print(f"[{time.asctime()}] {device_type.title()} requesting assignment...", file=sys.stderr, flush=True)
+             try:
+                 device_data = scheduler.get_assignments()
+                 if not device_data:
+                     print(f"Error trying to get assignments. Waiting a bit...")
+                     time.sleep(5)
+                     continue
 
-             if device_data.taskIdentifier:
-                  init_time = time.perf_counter()
-                  thread_event.clear()
-                  TERMINAL_FLAG = True
-                  x = threading.Thread(target=thread_function, args=(scheduler, device_data.taskIdentifier, thread_event), daemon=True)
-                  x.start()
-                  if device_type == 'receiver' or device_type == 'transmitter':
-                      grc_file_content = device_data.grcFileContent
-                  else:
-                      scheduler.error_message_delivery(device_data.taskIdentifier, f"Unsupported type: {device_type}")
-                      early_terminate(scheduler, device_data.taskIdentifier)
-                      TERMINAL_FLAG = False
-                      
-                  grc_content = yaml.load(grc_file_content, Loader=Loader)
-                  target_filename = 'target_file'
-                  grc_content['options']['parameters']['id'] = target_filename
-                  grc_content['options']['parameters']['generate_options'] = 'no_gui'
+                 if device_data.taskIdentifier:
+                      init_time = time.perf_counter()
+                      thread_event.clear()
+                      TERMINAL_FLAG = True
+                      x = threading.Thread(target=thread_function, args=(scheduler, device_data.taskIdentifier, thread_event), daemon=True)
+                      x.start()
+                      if device_type == 'receiver' or device_type == 'transmitter':
+                          grc_file_content = device_data.grcFileContent
+                      else:
+                          scheduler.error_message_delivery(device_data.taskIdentifier, f"Unsupported type: {device_type}")
+                          early_terminate(scheduler, device_data.taskIdentifier)
+                          TERMINAL_FLAG = False
+                          
+                      grc_content = yaml.load(grc_file_content, Loader=Loader)
+                      target_filename = 'target_file'
+                      grc_content['options']['parameters']['id'] = target_filename
+                      grc_content['options']['parameters']['generate_options'] = 'no_gui'
 
-                  for block in grc_content['blocks']:
-                       if block['id'] in conversions:
-                            block['id'] = conversions[block['id']]
-                            block_yml = os.path.join(default_hier_block_lib_dir, f"{block['id']}.block.yml")
-                            if not os.path.exists(block_yml):
-                                 scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
-                                 early_terminate(scheduler, device_data.taskIdentifier)
-                                 TERMINAL_FLAG = False
+                      for block in grc_content['blocks']:
+                           if block['id'] in conversions:
+                                block['id'] = conversions[block['id']]
+                                block_yml = os.path.join(default_hier_block_lib_dir, f"{block['id']}.block.yml")
+                                if not os.path.exists(block_yml):
+                                     scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
+                                     early_terminate(scheduler, device_data.taskIdentifier)
+                                     TERMINAL_FLAG = False
 
-                  uploader_base_url = DATA_UPLOADER_BASE_URL
-                  session_id = device_data.sessionIdentifier
+                      session_id = device_data.sessionIdentifier
 
-                  print(f"Resetting device {device_id}")
-                  delete_response = requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}")
-                  try:
-                      delete_response.raise_for_status()
-                      print(delete_response.json())
-                  except Exception as err:
-                      print(f"Error deleting previous device data: {err}; {delete_response.content}")
+                      print(f"Resetting device {device_id}", flush=True)
+                      delete_response = requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}")
+                      try:
+                          delete_response.raise_for_status()
+                          print(delete_response.json())
+                      except Exception as err:
+                          print(f"Error deleting previous device data: {err}; {delete_response.content}", file=sys.stderr, flush=True)
 
 
-                  tmpdir_kwargs = {}
-                  if os.name == 'nt' or "microsoft" in platform.platform().lower():
-                      tmpdir_kwargs['ignore_cleanup_errors'] = True
-                  tmpdir = tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs)
-                  grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
-                  py_filename = os.path.join(tmpdir.name, f'{target_filename}.py')
+                      tmpdir_kwargs = {}
+                      if os.name == 'nt' or "microsoft" in platform.platform().lower():
+                          tmpdir_kwargs['ignore_cleanup_errors'] = True
+                      tmpdir = tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs)
+                      grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
+                      py_filename = os.path.join(tmpdir.name, f'{target_filename}.py')
 
-                  open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
+                      open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
 
-                  open(os.path.join(tmpdir.name, 'relia.json'), 'w').write(json.dumps({
-                       'uploader_base_url': uploader_base_url,
-                       'session_id': session_id,
-                       'device_id': device_id,
-                  }))
+                      open(os.path.join(tmpdir.name, 'relia.json'), 'w').write(json.dumps({
+                           'uploader_base_url': uploader_base_url,
+                           'session_id': session_id,
+                           'device_id': device_id,
+                      }))
 
-                  command = ['grcc', grc_filename, '-o', tmpdir.name]
-                  if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
-                       early_terminate(scheduler, device_data.taskIdentifier)
-                       TERMINAL_FLAG = False
+                      command = ['grcc', grc_filename, '-o', tmpdir.name]
+                      if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                           early_terminate(scheduler, device_data.taskIdentifier)
+                           TERMINAL_FLAG = False
 
-                  if TERMINAL_FLAG:
-                       p = subprocess.Popen(command, cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                       while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
-                                 p.terminate()
-                                 early_terminate(scheduler, device_data.taskIdentifier)
-                                 TERMINAL_FLAG = False
-                                 break
+                      if TERMINAL_FLAG:
+                           p = subprocess.Popen(command, cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                           while p.poll() is None:
+                                if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                                     p.terminate()
+                                     early_terminate(scheduler, device_data.taskIdentifier)
+                                     TERMINAL_FLAG = False
+                                     break
 
-                       output, error = p.communicate()
-                       if p.returncode != 0:                 
-                            scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
-                            early_terminate(scheduler, device_data.taskIdentifier)
-                            TERMINAL_FLAG = False
+                           output, error = p.communicate()
+                           if p.returncode != 0:                 
+                                scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
+                                early_terminate(scheduler, device_data.taskIdentifier)
+                                TERMINAL_FLAG = False
 
-                  if TERMINAL_FLAG:
-                       p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                       while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
-                                 p.terminate()
-                                 early_terminate(scheduler, device_data.taskIdentifier)
-                                 TERMINAL_FLAG = False
-                                 break
+                      if TERMINAL_FLAG:
+                           p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+                           while p.poll() is None:
+                                if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                                     p.terminate()
+                                     early_terminate(scheduler, device_data.taskIdentifier)
+                                     TERMINAL_FLAG = False
+                                     break
 
-                       output, error = p.communicate()
-                       if p.returncode != 0:
-                            scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
-                            early_terminate(scheduler, device_data.taskIdentifier)
-                            TERMINAL_FLAG = False
-                            
-                  if TERMINAL_FLAG:
-                       thread_event.set()
-                       tmpdir.cleanup()
-                       print(f"{device_type.title()} completing task")
-                       scheduler.complete_assignments(device_data.taskIdentifier)
-             else:
-                  print("Previous assignment failed; do nothing")
-                  time.sleep(1)
+                           output, error = p.communicate()
+                           if p.returncode != 0:
+                                scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
+                                early_terminate(scheduler, device_data.taskIdentifier)
+                                TERMINAL_FLAG = False
+                                
+                      if TERMINAL_FLAG:
+                           thread_event.set()
+                           tmpdir.cleanup()
+                           print(f"{device_type.title()} completing task", flush=True)
+                           scheduler.complete_assignments(device_data.taskIdentifier)
+                 else:
+                      print("Previous assignment failed; do nothing", file=sys.stderr, flush=True)
+                      time.sleep(1)
+            except Exception as err:
+                print(f"Uncaught processing tasks: {err}", file=sys.stderr, flush=True)
+                traceback.print_exc()
+                sys.stderr.flush()
+                time.sleep(2)
 
     return app
 
