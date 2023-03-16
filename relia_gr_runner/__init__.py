@@ -6,6 +6,7 @@ import time
 import shutil
 import pathlib
 import tempfile
+import platform
 import argparse
 import subprocess
 import requests
@@ -111,7 +112,10 @@ def create_app(config_name: str = 'default'):
                       print(f"Error deleting previous device data: {err}; {delete_response.content}")
 
 
-                  tmpdir = tempfile.TemporaryDirectory(prefix='relia-', ignore_cleanup_errors=True)
+                  tmpdir_kwargs = {}
+                  if os.name == 'nt' or "microsoft" in platform.platform().lower():
+                      tmpdir_kwargs['ignore_cleanup_errors'] = True
+                  tmpdir = tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs)
                   grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
                   py_filename = os.path.join(tmpdir.name, f'{target_filename}.py')
 
