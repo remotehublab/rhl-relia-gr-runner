@@ -103,7 +103,13 @@ def create_app(config_name: str = 'default'):
                   session_id = device_data.sessionIdentifier
 
                   print(f"Resetting device {device_id}")
-                  print(requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}").json())
+                  delete_response = requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}")
+                  try:
+                      delete_response.raise_for_status()
+                      print(delete_response.json())
+                  except Exception as err:
+                      print(f"Error deleting previous device data: {err}; {delete_response.content}")
+
 
                   tmpdir = tempfile.TemporaryDirectory(prefix='relia-', ignore_cleanup_errors=True)
                   grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
