@@ -25,8 +25,9 @@ class SchedulerClient:
         except Exception as e:
             if str(e)[0] == '5':
                 time.sleep(2)
-
-        return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
+            return None
+        else:
+            return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
                               sessionIdentifier=device_data.get('sessionIdentifier'),
                               grcFile=device_data.get('grcFile'),
                               grcFileContent=device_data.get('grcFileContent'),
