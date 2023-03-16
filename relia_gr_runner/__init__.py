@@ -78,8 +78,8 @@ def create_app(config_name: str = 'default'):
                     init_time = time.perf_counter()
                     thread_event.clear()
                     TERMINAL_FLAG = True
-                    x = threading.Thread(target=thread_function, args=(scheduler, device_data.taskIdentifier, thread_event), daemon=True)
-                    x.start()
+                    scheduler_polling_thread = threading.Thread(target=thread_function, args=(scheduler, device_data.taskIdentifier, thread_event), daemon=True)
+                    scheduler_polling_thread.start()
                     if device_type == 'receiver' or device_type == 'transmitter':
                         grc_file_content = device_data.grcFileContent
                     else:
@@ -128,14 +128,14 @@ def create_app(config_name: str = 'default'):
                     }))
 
                     command = ['grcc', grc_filename, '-o', tmpdir.name]
-                    if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                    if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                         early_terminate(scheduler, device_data.taskIdentifier)
                         TERMINAL_FLAG = False
 
                     if TERMINAL_FLAG:
                         p = subprocess.Popen(command, cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                         while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                            if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                 p.terminate()
                                 early_terminate(scheduler, device_data.taskIdentifier)
                                 TERMINAL_FLAG = False
@@ -150,7 +150,7 @@ def create_app(config_name: str = 'default'):
                     if TERMINAL_FLAG:
                         p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir.name, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
                         while p.poll() is None:
-                            if not x.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                            if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                 p.terminate()
                                 early_terminate(scheduler, device_data.taskIdentifier)
                                 TERMINAL_FLAG = False
@@ -179,13 +179,15 @@ def create_app(config_name: str = 'default'):
     return app
 
 def early_terminate(scheduler, task_identifier):
-    print("Task being purged due to deletion")
+    print(f"[{time.asctime()}] Task being purged due to deletion", flush=True)
+    print(f"[{time.asctime()}] Task being purged due to deletion", file=sys.stderr, flush=True)
     scheduler.complete_assignments(task_identifier)
 
 def thread_function(scheduler, task_identifier, thread_event):
     while not thread_event.is_set():
-        x = scheduler.check_assignment(task_identifier)
-        print(x)
-        if x == "deleted" or x == "completed":
+        task_assignment_status = scheduler.check_assignment(task_identifier)
+        print(f"[{time.asctime()}] Status of the task: {task_assignment_status}", flush=True)
+        if task_assignment_status in ("deleted", "completed"):
+            print(f"[{time.asctime()}] Stopping task status checking thread", flush=True)
             break
         time.sleep(2)
