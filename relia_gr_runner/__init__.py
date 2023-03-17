@@ -84,6 +84,7 @@ def create_app(config_name: str = 'default'):
                         grc_file_content = device_data.grcFileContent
                     else:
                         scheduler.error_message_delivery(device_data.taskIdentifier, f"Unsupported type: {device_type}")
+                        print(f"[{time.asctime()}] Unsupported type: {device_type}", file=sys.stderr, flush=True)
                         early_terminate(scheduler, device_data.taskIdentifier)
                         TERMINAL_FLAG = False
                         
@@ -98,18 +99,20 @@ def create_app(config_name: str = 'default'):
                             block_yml = os.path.join(default_hier_block_lib_dir, f"{block['id']}.block.yml")
                             if not os.path.exists(block_yml):
                                 scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
+                                print(f"[{time.asctime()}] The file {block_yml} does not exists. Have you recently installed relia-blocks?", file=sys.stdout, flush=True)
+                                print(f"[{time.asctime()}] The file {block_yml} does not exists. Have you recently installed relia-blocks?", file=sys.stderr, flush=True)
                                 early_terminate(scheduler, device_data.taskIdentifier)
                                 TERMINAL_FLAG = False
 
                     session_id = device_data.sessionIdentifier
 
-                    print(f"Resetting device {device_id}", flush=True)
+                    print(f"[{time.asctime()}] Resetting device {device_id}", flush=True)
                     delete_response = requests.delete(uploader_base_url + f"api/download/sessions/{session_id}/devices/{device_id}")
                     try:
                         delete_response.raise_for_status()
                         print(delete_response.json())
                     except Exception as err:
-                        print(f"Error deleting previous device data: {err}; {delete_response.content}", file=sys.stderr, flush=True)
+                        print(f"[{time.asctime()}] Error deleting previous device data: {err}; {delete_response.content}", file=sys.stderr, flush=True)
 
 
                     tmpdir_kwargs = {}
@@ -129,6 +132,10 @@ def create_app(config_name: str = 'default'):
 
                     command = ['grcc', grc_filename, '-o', tmpdir.name]
                     if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+                        if not scheduler_polling_thread.is_alive():
+                            print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling early_terminate...", file=sys.stderr, flush=True)
+                        else:
+                            print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
                         early_terminate(scheduler, device_data.taskIdentifier)
                         TERMINAL_FLAG = False
 
@@ -137,12 +144,17 @@ def create_app(config_name: str = 'default'):
                         while p.poll() is None:
                             if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                 p.terminate()
+                                if not scheduler_polling_thread.is_alive():
+                                    print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling early_terminate...", file=sys.stderr, flush=True)
+                                else:
+                                    print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
                                 early_terminate(scheduler, device_data.taskIdentifier)
                                 TERMINAL_FLAG = False
                                 break
 
                         output, error = p.communicate()
                         if p.returncode != 0:                 
+                            print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling early_terminate...", file=sys.stderr, flush=True)
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
                             TERMINAL_FLAG = False
@@ -152,12 +164,18 @@ def create_app(config_name: str = 'default'):
                         while p.poll() is None:
                             if not scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                                 p.terminate()
+                                if not scheduler_polling_thread.is_alive():
+                                    print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling early_terminate...", file=sys.stderr, flush=True)
+                                else:
+                                    print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
+
                                 early_terminate(scheduler, device_data.taskIdentifier)
                                 TERMINAL_FLAG = False
                                 break
 
                         output, error = p.communicate()
                         if p.returncode != 0:
+                            print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling early_terminate...", file=sys.stderr, flush=True)
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
                             TERMINAL_FLAG = False
