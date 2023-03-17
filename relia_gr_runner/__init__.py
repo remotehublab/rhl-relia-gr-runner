@@ -155,6 +155,8 @@ def create_app(config_name: str = 'default'):
                         output, error = p.communicate()
                         if p.returncode != 0:                 
                             print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling early_terminate...", file=sys.stderr, flush=True)
+                            print(f"[{time.asctime()}] Output: {output}", file=sys.stderr, flush=True)
+                            print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
                             TERMINAL_FLAG = False
@@ -176,6 +178,8 @@ def create_app(config_name: str = 'default'):
                         output, error = p.communicate()
                         if p.returncode != 0:
                             print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling early_terminate...", file=sys.stderr, flush=True)
+                            print(f"[{time.asctime()}] Output: {output}", file=sys.stderr, flush=True)
+                            print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
                             scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
                             early_terminate(scheduler, device_data.taskIdentifier)
                             TERMINAL_FLAG = False
