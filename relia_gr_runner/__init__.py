@@ -31,6 +31,7 @@ def create_app(config_name: str = 'default'):
         Process tasks
         """
         from .scheduler import SchedulerClient
+        from .grc_processor import GrcProcessor
 
         device_id = current_app.config['DEVICE_ID']
         password = current_app.config['PASSWORD']
@@ -45,24 +46,15 @@ def create_app(config_name: str = 'default'):
             print(f"Error: RELIA_GR_BLOCKS_PATH not properly configured, path: {default_hier_block_lib_dir} not found.", file=sys.stderr, flush=True)
             sys.exit(1)
 
+        adalm_pluto_ip_address = current_app.config['ADALM_PLUTO_IP_ADDRESS']
+        if adalm_pluto_ip_address is None:
+            print(f"Error: ADALM_PLUTO_IP_ADDRESS environment variable is required")
+            sys.exit(1)
 
         TERMINAL_FLAG = True
 
         thread_event = threading.Event()
         scheduler = SchedulerClient()
-        conversions = {
-                       'qtgui_time_sink_x': 'relia_time_sink_x',
-                       'qtgui_const_sink_x': 'relia_const_sink_x',
-                       'qtgui_vector_sink_f': 'relia_vector_sink_f',
-                       'qtgui_histogram_sink_x': 'relia_histogram_sink_x',
-                       'variable_qtgui_range': 'variable_relia_range',
-                       'variable_qtgui_check_box': 'variable_relia_check_box',
-                       'variable_qtgui_push_button': 'variable_relia_push_button',
-                       'variable_qtgui_chooser': 'variable_relia_chooser',
-                       'qtgui_number_sink': 'relia_number_sink',      
-                       'eye_plot': 'relia_eye_plot_x',      
-                       'qtgui_freq_sink_x': 'relia_freq_sink_x',
-                      }
 
         while True:
             print(f"[{time.asctime()}] {device_type.title()} requesting assignment...", flush=True)
@@ -87,22 +79,9 @@ def create_app(config_name: str = 'default'):
                         print(f"[{time.asctime()}] Unsupported type: {device_type}", file=sys.stderr, flush=True)
                         early_terminate(scheduler, device_data.taskIdentifier)
                         TERMINAL_FLAG = False
-                        
-                    grc_content = yaml.load(grc_file_content, Loader=Loader)
+                    
                     target_filename = 'target_file'
-                    grc_content['options']['parameters']['id'] = target_filename
-                    grc_content['options']['parameters']['generate_options'] = 'no_gui'
-
-                    for block in grc_content['blocks']:
-                        if block['id'] in conversions:
-                            block['id'] = conversions[block['id']]
-                            block_yml = os.path.join(default_hier_block_lib_dir, f"{block['id']}.block.yml")
-                            if not os.path.exists(block_yml):
-                                scheduler.error_message_delivery(device_data.taskIdentifier, f"The file {block_yml} does not exists. Have you recently installed relia-blocks?")
-                                print(f"[{time.asctime()}] The file {block_yml} does not exists. Have you recently installed relia-blocks?", file=sys.stdout, flush=True)
-                                print(f"[{time.asctime()}] The file {block_yml} does not exists. Have you recently installed relia-blocks?", file=sys.stderr, flush=True)
-                                early_terminate(scheduler, device_data.taskIdentifier)
-                                TERMINAL_FLAG = False
+                    grc_processor = GrcProcessor(grc_file_content, target_filename, default_hier_block_lib_dir)
 
                     session_id = device_data.sessionIdentifier
 
@@ -122,7 +101,7 @@ def create_app(config_name: str = 'default'):
                     grc_filename = os.path.join(tmpdir.name, 'user_file.grc')
                     py_filename = os.path.join(tmpdir.name, f'{target_filename}.py')
 
-                    open(grc_filename, 'w').write(yaml.dump(grc_content, Dumper=Dumper))
+                    grc_processor.save(tmpdir.name, 'user_file.grc')
 
                     open(os.path.join(tmpdir.name, 'relia.json'), 'w').write(json.dumps({
                          'uploader_base_url': uploader_base_url,

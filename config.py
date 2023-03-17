@@ -7,6 +7,7 @@ class Config:
     DATA_UPLOADER_BASE_URL = os.environ.get('DATA_UPLOADER_BASE_URL')
     SCHEDULER_BASE_URL = os.environ.get('SCHEDULER_BASE_URL')
     DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
+    ADALM_PLUTO_IP_ADDRESS = os.environ.get('ADALM_PLUTO_IP_ADDRESS')
 
 
 class DevelopmentConfig(Config):
