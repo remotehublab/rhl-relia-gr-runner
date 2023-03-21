@@ -36,8 +36,7 @@ class SchedulerClient:
                               maxTime=device_data.get('maxTime'))
             
     def check_assignment(self, taskIdentifier):
-        omnipotent_user = "Omnipotent"
-        device_data = requests.get(f"{self.base_url}scheduler/devices/task-status/{taskIdentifier}?max_seconds=5", timeout=(30,30)).json()
+        device_data = requests.get(f"{self.base_url}scheduler/devices/task-status/{taskIdentifier}?max_seconds=5", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()
         return device_data.get('status')
 
     def complete_assignments(self, taskIdentifier):
