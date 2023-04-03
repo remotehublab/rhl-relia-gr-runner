@@ -38,6 +38,7 @@ class GrcProcessor:
             'qtgui_number_sink': 'relia_number_sink',      
             'eye_plot': 'relia_eye_plot_x',      
             'qtgui_freq_sink_x': 'relia_freq_sink_x',
+            'qtgui_auto_correlator_sink': 'relia_autocorr_sink',            
         }
 
         for block in self.grc_content['blocks']:
