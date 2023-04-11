@@ -73,7 +73,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '4'
+    amp: '.1'
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -167,6 +167,22 @@ blocks:
     coordinate: [176, 284.0]
     rotation: 0
     state: true
+- name: blocks_complex_to_float_0
+  id: blocks_complex_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [728, 156.0]
+    rotation: 0
+    state: true
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -236,7 +252,7 @@ blocks:
     bus_structure: null
     coordinate: [472, 340.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -254,7 +270,7 @@ blocks:
     bus_structure: null
     coordinate: [328, 340.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_stream_to_vector_0
   id: blocks_stream_to_vector
   parameters:
@@ -329,6 +345,23 @@ blocks:
     coordinate: [256, 276.0]
     rotation: 0
     state: true
+- name: eye_plot_0
+  id: eye_plot
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    nop: '1024'
+    samp_rate: '32000'
+    time_delay: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [856, 124.0]
+    rotation: 0
+    state: true
 - name: qtgui_auto_correlator_sink_1
   id: qtgui_auto_correlator_sink
   parameters:
@@ -336,7 +369,7 @@ blocks:
     alias: ''
     autoScale: 'True'
     comment: ''
-    fac_decimation: '4'
+    fac_decimation: '1'
     fac_size: '32'
     grid: 'True'
     gui_hint: ''
@@ -351,7 +384,7 @@ blocks:
     bus_structure: null
     coordinate: [600, 56.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: qtgui_const_sink_x_0
   id: qtgui_const_sink_x
   parameters:
@@ -524,7 +557,7 @@ blocks:
     bus_structure: null
     coordinate: [792, 348.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -579,7 +612,7 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: RELIA FULL PARAMETERS
-    nconnections: '2'
+    nconnections: '1'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
@@ -621,7 +654,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 132.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_vector_sink_f_0
   id: qtgui_vector_sink_f
   parameters:
@@ -700,16 +733,16 @@ blocks:
 connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0, '1']
 - [analog_noise_source_x_0, '0', blocks_add_xx_0_0, '0']
-- [analog_noise_source_x_0, '0', qtgui_time_sink_x_0, '0']
 - [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
 - [analog_sig_source_x_1, '0', blocks_add_xx_0_0, '1']
 - [blocks_add_xx_0, '0', blocks_throttle_0, '0']
 - [blocks_add_xx_0_0, '0', blocks_throttle_0_0, '0']
+- [blocks_complex_to_float_0, '0', eye_plot_0, '0']
 - [blocks_complex_to_mag_0, '0', blocks_stream_to_vector_0, '0']
 - [blocks_complex_to_mag_1, '0', blocks_stream_to_vector_0_0, '0']
+- [blocks_delay_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_delay_0, '0', qtgui_const_sink_x_0, '0']
 - [blocks_delay_0, '0', qtgui_freq_sink_x_0, '0']
-- [blocks_delay_0, '0', qtgui_time_sink_x_0, '1']
 - [blocks_delay_0_0, '0', qtgui_const_sink_x_0, '1']
 - [blocks_delay_0_0, '0', qtgui_freq_sink_x_0, '1']
 - [blocks_multiply_const_vxx_0, '0', blocks_complex_to_mag_0, '0']
@@ -720,6 +753,7 @@ connections:
 - [blocks_throttle_0, '0', blocks_delay_0, '0']
 - [blocks_throttle_0, '0', qtgui_auto_correlator_sink_1, '0']
 - [blocks_throttle_0_0, '0', blocks_multiply_const_vxx_0, '0']
+- [blocks_throttle_0_0, '0', qtgui_time_sink_x_0, '0']
 
 metadata:
   file_format: 1
