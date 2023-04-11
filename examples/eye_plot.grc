@@ -1,0 +1,399 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: hb_qt_gui
+    hier_block_src_path: '.:'
+    id: eye_plot
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Eye Plot
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 2 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [185, 180]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 3 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [185, 223]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 4 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [186, 269]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 5 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [186, 314]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 6 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [186, 358]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 7 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [188, 401]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 8 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [186, 445]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 9 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [186, 490]
+    rotation: 0
+    state: true
+- name: blocks_delay_0_0_0_0_0_0_0_0_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: 1 * time_delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [187, 137]
+    rotation: 0
+    state: true
+- name: nop
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Number of Points
+    short_id: ''
+    type: ''
+    value: '1024'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [475, 7]
+    rotation: 0
+    state: true
+- name: pad_source_0
+  id: pad_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: in
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '1'
+    optional: 'False'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [10, 102]
+    rotation: 0
+    state: true
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'True'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '10'
+    size: nop
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '2'
+    ymin: '-2'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [413, 106]
+    rotation: 0
+    state: true
+- name: samp_rate
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Sample Rate
+    short_id: ''
+    type: ''
+    value: '32000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [237, 8]
+    rotation: 0
+    state: true
+- name: time_delay
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Time Delay
+    short_id: ''
+    type: ''
+    value: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [356, 8]
+    rotation: 0
+    state: true
+
+connections:
+- [blocks_delay_0, '0', qtgui_time_sink_x_0, '2']
+- [blocks_delay_0_0, '0', qtgui_time_sink_x_0, '3']
+- [blocks_delay_0_0_0, '0', qtgui_time_sink_x_0, '4']
+- [blocks_delay_0_0_0_0, '0', qtgui_time_sink_x_0, '5']
+- [blocks_delay_0_0_0_0_0, '0', qtgui_time_sink_x_0, '6']
+- [blocks_delay_0_0_0_0_0_0, '0', qtgui_time_sink_x_0, '7']
+- [blocks_delay_0_0_0_0_0_0_0, '0', qtgui_time_sink_x_0, '8']
+- [blocks_delay_0_0_0_0_0_0_0_0, '0', qtgui_time_sink_x_0, '9']
+- [blocks_delay_0_0_0_0_0_0_0_0_0, '0', qtgui_time_sink_x_0, '1']
+- [pad_source_0, '0', blocks_delay_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0_0_0_0_0, '0']
+- [pad_source_0, '0', blocks_delay_0_0_0_0_0_0_0_0_0, '0']
+- [pad_source_0, '0', qtgui_time_sink_x_0, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.4.0

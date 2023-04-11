@@ -359,7 +359,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [856, 124.0]
+    coordinate: [864, 100.0]
     rotation: 0
     state: true
 - name: qtgui_auto_correlator_sink_1
