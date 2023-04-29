@@ -53,9 +53,7 @@ blocks:
     label: ''
     min_len: '200'
     orient: QtCore.Qt.Horizontal
-    outputmsgname: value
     rangeType: float
-    showports: 'False'
     start: '0'
     step: '1'
     stop: '40000'
@@ -67,7 +65,7 @@ blocks:
     bus_structure: null
     coordinate: [128, 440.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: analog_noise_source_x_0
   id: analog_noise_source_x
   parameters:
@@ -100,6 +98,7 @@ blocks:
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
+    showports: 'False'
     type: complex
     waveform: analog.GR_COS_WAVE
   states:
@@ -116,12 +115,13 @@ blocks:
     alias: ''
     amp: '1.5'
     comment: ''
-    freq: variable_qtgui_range_0
+    freq: '50'
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
     phase: '0'
     samp_rate: samp_rate
+    showports: 'False'
     type: complex
     waveform: analog.GR_COS_WAVE
   states:
@@ -182,7 +182,7 @@ blocks:
     bus_structure: null
     coordinate: [728, 156.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -225,6 +225,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
+    showports: 'False'
     type: complex
     vlen: '1'
   states:
@@ -244,6 +245,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
+    showports: 'False'
     type: complex
     vlen: '1'
   states:
@@ -307,13 +309,15 @@ blocks:
     coordinate: [552, 508.0]
     rotation: 0
     state: disabled
-- name: blocks_throttle_0
-  id: blocks_throttle
+- name: blocks_throttle2_0
+  id: blocks_throttle2
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_second: samp_rate
@@ -323,16 +327,18 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 148.0]
+    coordinate: [360, 144.0]
     rotation: 0
     state: true
-- name: blocks_throttle_0_0
-  id: blocks_throttle
+- name: blocks_throttle2_1
+  id: blocks_throttle2
   parameters:
     affinity: ''
     alias: ''
     comment: ''
     ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_second: samp_rate
@@ -342,7 +348,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 276.0]
+    coordinate: [256, 272.0]
     rotation: 0
     state: true
 - name: eye_plot_0
@@ -361,7 +367,7 @@ blocks:
     bus_structure: null
     coordinate: [864, 100.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: qtgui_auto_correlator_sink_1
   id: qtgui_auto_correlator_sink
   parameters:
@@ -437,7 +443,7 @@ blocks:
     marker8: '0'
     marker9: '0'
     name: '""'
-    nconnections: '2'
+    nconnections: '1'
     size: '1024'
     style1: '0'
     style10: '0'
@@ -476,7 +482,7 @@ blocks:
     bus_structure: null
     coordinate: [744, 244.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -735,26 +741,24 @@ connections:
 - [analog_noise_source_x_0, '0', blocks_add_xx_0_0, '0']
 - [analog_sig_source_x_0, '0', blocks_add_xx_0, '0']
 - [analog_sig_source_x_1, '0', blocks_add_xx_0_0, '1']
-- [blocks_add_xx_0, '0', blocks_throttle_0, '0']
-- [blocks_add_xx_0_0, '0', blocks_throttle_0_0, '0']
+- [blocks_add_xx_0, '0', blocks_throttle2_0, '0']
+- [blocks_add_xx_0_0, '0', blocks_throttle2_1, '0']
 - [blocks_complex_to_float_0, '0', eye_plot_0, '0']
 - [blocks_complex_to_mag_0, '0', blocks_stream_to_vector_0, '0']
 - [blocks_complex_to_mag_1, '0', blocks_stream_to_vector_0_0, '0']
 - [blocks_delay_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_delay_0, '0', qtgui_const_sink_x_0, '0']
 - [blocks_delay_0, '0', qtgui_freq_sink_x_0, '0']
-- [blocks_delay_0_0, '0', qtgui_const_sink_x_0, '1']
 - [blocks_delay_0_0, '0', qtgui_freq_sink_x_0, '1']
 - [blocks_multiply_const_vxx_0, '0', blocks_complex_to_mag_0, '0']
 - [blocks_multiply_const_vxx_0, '0', blocks_delay_0_0, '0']
 - [blocks_stream_to_vector_0, '0', qtgui_vector_sink_f_0, '0']
 - [blocks_stream_to_vector_0_0, '0', qtgui_vector_sink_f_0, '1']
-- [blocks_throttle_0, '0', blocks_complex_to_mag_1, '0']
-- [blocks_throttle_0, '0', blocks_delay_0, '0']
-- [blocks_throttle_0, '0', qtgui_auto_correlator_sink_1, '0']
-- [blocks_throttle_0_0, '0', blocks_multiply_const_vxx_0, '0']
-- [blocks_throttle_0_0, '0', qtgui_time_sink_x_0, '0']
+- [blocks_throttle2_0, '0', blocks_delay_0, '0']
+- [blocks_throttle2_0, '0', qtgui_time_sink_x_0, '0']
+- [blocks_throttle2_1, '0', blocks_multiply_const_vxx_0, '0']
+- [blocks_throttle2_1, '0', qtgui_auto_correlator_sink_1, '0']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.4.0
+  grc_version: 3.10.6.0
