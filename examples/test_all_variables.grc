@@ -130,7 +130,7 @@ blocks:
     bus_structure: null
     coordinate: [32, 316.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -166,7 +166,7 @@ blocks:
     bus_structure: null
     coordinate: [176, 284.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_complex_to_float_0
   id: blocks_complex_to_float
   parameters:
@@ -350,7 +350,7 @@ blocks:
     bus_structure: null
     coordinate: [256, 272.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: eye_plot_0
   id: eye_plot
   parameters:
