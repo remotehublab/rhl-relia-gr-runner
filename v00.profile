@@ -1,6 +1,13 @@
+net https://relia.test.rhlab.ece.uw.edu/scheduler/devices
+ip none
 blacklist /boot/*
+whitelist /dev/fd*
+read-only /dev/fd*
+whitelist /dev/sh*
 whitelist /home/relia/.config/pulse
 read-only /home/relia/.config/pulse
+whitelist /home/relia/.gnuradio/prefs/vmcircbuf_default_factory
+read-only /home/relia/.gnuradio/prefs/vmcircbuf_default_factory
 blacklist /lost+found/*
 blacklist /media/*
 blacklist /mnt/*
@@ -18,41 +25,6 @@ blacklist /usr/sbin/*
 blacklist /usr/src/*
 whitelist /var/tmp/systemd-private-*
 read-only /var/tmp/systemd-private-*
-
-blacklist /dev/autofs/*
-blacklist /dev/b*
-blacklist /dev/c*
-blacklist /dev/d*
-# blacklist /dev/f*
-blacklist /dev/fb0
-blacklist /dev/fd/*
-blacklist /dev/full
-blacklist /dev/fuse
-blacklist /dev/gpi*
-blacklist /dev/h*
-blacklist /dev/i*
-blacklist /dev/kmsg/*
-blacklist /dev/lo*
-blacklist /dev/m*
-blacklist /dev/n*
-blacklist /dev/p*
-blacklist /dev/r*
-# blacklist /dev/s*
-blacklist /dev/sda
-blacklist /dev/sda1
-blacklist /dev/serial/*
-blacklist /dev/serial1
-blacklist /dev/sg0
-blacklist /dev/shm/*
-blacklist /dev/snd/*
-blacklist /dev/stderr
-blacklist /dev/stdin
-blacklist /dev/stdout
-blacklist /dev/tty*
-blacklist /dev/u*
-blacklist /dev/v*
-blacklist /dev/watchdog*
-blacklist /dev/zero/*
 
 blacklist /run/a*
 blacklist /run/blkid/*
@@ -219,8 +191,18 @@ blacklist /etc/ODBCDataSources/*
 blacklist /etc/o*
 blacklist /etc/PackageKit/*
 blacklist /etc/p*
-blacklist /etc/r*
 blacklist /etc/RTIMULib.ini
+blacklist /etc/rc*
+blacklist /etc/redis/*
+blacklist /etc/req*
+read-only /etc/resolv.conf
+blacklist /etc/resolvconf/*
+blacklist /etc/resolv.conf.bak
+blacklist /etc/resolvconf.conf
+blacklist /etc/rmt
+blacklist /etc/rp*
+blacklist /etc/rs*
+blacklist /etc/runit/*
 blacklist /etc/sane.d/*
 blacklist /etc/se*
 blacklist /etc/sgml/*
