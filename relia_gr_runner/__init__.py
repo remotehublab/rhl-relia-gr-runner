@@ -103,6 +103,7 @@ def create_app(config_name: str = 'default'):
                     py_filename = os.path.join(tmpdir.name, f'{target_filename}.py')
 
                     grc_processor.save(tmpdir.name, 'user_file.grc')
+                    grc_processor.save('/mnt/c/Users/Brian/Documents/relia-gr-runner/postprocessed', 'user_file.grc')
 
                     open(os.path.join(tmpdir.name, 'relia.json'), 'w').write(json.dumps({
                          'uploader_base_url': uploader_base_url,
@@ -166,7 +167,7 @@ def create_app(config_name: str = 'default'):
                               
                     if TERMINAL_FLAG:
                         thread_event.set()
-                        tmpdir.cleanup()
+                        # tmpdir.cleanup()
                         print(f"{device_type.title()} completing task", flush=True)
                         scheduler.complete_assignments(device_data.taskIdentifier)
                 else:
@@ -187,9 +188,9 @@ def early_terminate(scheduler, task_identifier):
 
 def thread_function(scheduler, task_identifier, thread_event):
     while not thread_event.is_set():
+        time.sleep(5)
         task_assignment_status = scheduler.check_assignment(task_identifier)
         print(f"[{time.asctime()}] Status of the task: {task_assignment_status}", flush=True)
         if task_assignment_status in ("deleted", "completed"):
             print(f"[{time.asctime()}] Stopping task status checking thread", flush=True)
             break
-        time.sleep(2)
