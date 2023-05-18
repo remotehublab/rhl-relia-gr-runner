@@ -8,6 +8,7 @@ class Config:
     SCHEDULER_BASE_URL = os.environ.get('SCHEDULER_BASE_URL')
     DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
     ADALM_PLUTO_IP_ADDRESS = os.environ.get('ADALM_PLUTO_IP_ADDRESS')
+    MAX_GR_PYTHON_EXECUTION_TIME = float(os.environ.get('MAX_GR_PYTHON_EXECUTION_TIME') or '12')
 
 
 class DevelopmentConfig(Config):

@@ -10,7 +10,7 @@ import subprocess
 
 import requests
 
-from relia_gr_runner.grc_processor import GrcProcessor
+from relia_gr_runner.grc_manager import GrcManager
 
 def main():
     parser = argparse.ArgumentParser()
@@ -25,7 +25,7 @@ def main():
 
     target_filename = 'target_file'
 
-    grc_processor = GrcProcessor(grc_content_serialized, target_filename)
+    grc_processor = GrcManager(grc_content_serialized, target_filename)
 
     # TODO
     if args.base_url:

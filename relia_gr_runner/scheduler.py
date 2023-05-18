@@ -1,7 +1,7 @@
 import requests
 import time
 import traceback
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 from datetime import datetime
 
 from flask import current_app
@@ -20,7 +20,7 @@ class SchedulerClient:
         self.device_type = current_app.config['DEVICE_TYPE']
         self.password = current_app.config['PASSWORD']
 
-    def get_assignments(self) -> TaskAssignment:
+    def get_assignments(self) -> Optional[TaskAssignment]:
         try:
             device_data = requests.get(f"{self.base_url}scheduler/devices/tasks/{self.device_type}?max_seconds=5", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()
         except Exception as e:
@@ -29,11 +29,15 @@ class SchedulerClient:
             traceback.print_exc()
             return None
         else:
-            return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
+            if device_data.get('success'):
+                return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
                               sessionIdentifier=device_data.get('sessionIdentifier'),
                               grcFile=device_data.get('grcFile'),
                               grcFileContent=device_data.get('grcFileContent'),
                               maxTime=device_data.get('maxTime'))
+            
+            print(f"Scheduler server failed: {device_data}")
+            return None
             
     def check_assignment(self, taskIdentifier):
         device_data = requests.get(f"{self.base_url}scheduler/devices/task-status/{taskIdentifier}?max_seconds=5", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()

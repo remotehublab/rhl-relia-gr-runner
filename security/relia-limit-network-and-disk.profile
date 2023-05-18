@@ -1,5 +1,6 @@
 net br0
 ip 10.10.20.2
+whitelist /home/relia/.gr_fftw_wisdom
 whitelist /home/relia/relia-blocks
 read-only /home/relia/relia-blocks
 whitelist /home/relia/.gnuradio/prefs

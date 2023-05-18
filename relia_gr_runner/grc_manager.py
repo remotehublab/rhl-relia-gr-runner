@@ -13,9 +13,9 @@ from werkzeug.utils import secure_filename
 # From gnuradio.core.Constants
 DEFAULT_HIER_BLOCK_LIB_DIR = os.path.expanduser('~/.grc_gnuradio')
 
-class GrcProcessor:
+class GrcManager:
     """
-    GrcProcessor is a GNU Radio file parser that manages the utilities related to this file.
+    GrcManager is a GNU Radio file parser that manages the utilities related to this file.
     """
     def __init__(self, grc_serialized_content: str, target_filename: str = 'target_file', gr_blocks_path: str = DEFAULT_HIER_BLOCK_LIB_DIR):
         self.grc_content = yaml.load(grc_serialized_content, Loader=Loader)
