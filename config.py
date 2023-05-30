@@ -9,7 +9,9 @@ class Config:
     DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
     ADALM_PLUTO_IP_ADDRESS = os.environ.get('ADALM_PLUTO_IP_ADDRESS')
     MAX_GR_PYTHON_EXECUTION_TIME = float(os.environ.get('MAX_GR_PYTHON_EXECUTION_TIME') or '12')
-
+    USE_FIREJAIL = os.environ.get('USE_FIREJAIL') in ('1', 'true')
+    FIREJAIL_IP_ADDRESS = os.environ.get('FIREJAIL_IP_ADDRESS') or '10.10.20.2'
+    FIREJAIL_INTERFACE = os.environ.get('FIREJAIL_INTERFACE') or 'br0'
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -21,9 +23,11 @@ class DevelopmentConfig(Config):
 
 class StagingConfig(Config):
     DEBUG = False
+    USE_FIREJAIL = True
 
 class ProductionConfig(Config):
     DEBUG = False
+    USE_FIREJAIL = True
 
 configurations = {
     'default': DevelopmentConfig,

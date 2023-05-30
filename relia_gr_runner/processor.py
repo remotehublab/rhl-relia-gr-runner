@@ -8,7 +8,7 @@ import threading
 import traceback
 import subprocess
 
-from typing import Optional
+from typing import List, Optional
 
 import requests
 
@@ -44,6 +44,38 @@ class Processor:
         self.scheduler = SchedulerClient()
         self.scheduler_polling_thread: Optional[threading.Thread] = None
 
+    def run_in_sandbox(self, command: List[str], tmpdir: str) -> subprocess.Popen:
+        """
+        Run the command in a firejail sandbox
+        """
+        use_firejail = current_app.config['USE_FIREJAIL']
+        if use_firejail:
+            ip_address = current_app.config['FIREJAIL_IP_ADDRESS']
+            interface = current_app.config['FIREJAIL_INTERFACE']
+            user = os.getenv('USER') or 'relia'
+            profile = '\n'.join([
+                        f"net {interface}",
+                        f"ip {ip_address}",
+                        f"whitelist /home/{user}/.gr_fftw_wisdom",
+                        f"whitelist /home/{user}/relia-blocks",
+                        f"read-only /home/{user}/relia-blocks",
+                        f"whitelist /home/{user}/.gnuradio/prefs",
+                        f"read-only /home/{user}/.gnuradio/prefs",
+                        f"whitelist {tmpdir}"
+                    ])
+            open(os.path.join(tmpdir, 'firejail.profile'), 'w').write(profile)
+
+            firejail_command = ['firejail', '--profile=firejail.profile']
+            firejail_command.extend(command)
+            print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}")
+            command_to_run = firejail_command
+        else:
+            print(f"[{time.asctime()}] Running command outside any sandbox: {' '.join(command)}")
+            command_to_run = command
+
+        return subprocess.Popen(command_to_run, cwd=tmpdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+
+
     def run_task_in_directory(self, tmpdir: str, grc_manager: GrcManager, session_id: str, device_data: dict, init_time: float, target_filename: str):
         grc_filename = os.path.join(tmpdir, 'user_file.grc')
         py_filename = os.path.join(tmpdir, f'{target_filename}.py')
@@ -54,7 +86,7 @@ class Processor:
             'uploader_base_url': self.uploader_base_url,
             'session_id': session_id,
             'device_id': self.device_id,
-        }))
+        })) 
 
         command = ['grcc', grc_filename, '-o', tmpdir]
         if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
@@ -65,7 +97,7 @@ class Processor:
             self.early_terminate(device_data.taskIdentifier)
             return
 
-        p = subprocess.Popen(command, cwd=tmpdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p = self.run_in_sandbox(command, tmpdir)
         while p.poll() is None:
             if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                 p.terminate()
@@ -88,7 +120,7 @@ class Processor:
 
         # TODO: in the future, instead of waiting a fixed time, stop the process 10 seconds AFTER the t.start() in the Python code inside the code
         gr_python_initial_time: float = time.time()
-        p = subprocess.Popen([sys.executable, py_filename], cwd=tmpdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p = self.run_in_sandbox([sys.executable, py_filename], tmpdir)
         while p.poll() is None:
             if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
                 p.terminate()
