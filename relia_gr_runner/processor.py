@@ -65,6 +65,13 @@ class Processor:
                     ])
             open(os.path.join(tmpdir, 'firejail.profile'), 'w').write(profile)
 
+            print(f"[{time.asctime()}] firejail.profile generated at {os.path.join(tmpdir, 'firejail.profile')}")
+            print(f"[{time.asctime()}] The content:")
+            print(profile)
+
+            print(f"[{time.asctime()}] The contents of the folder now are:")
+            print(glob.glob(f"{tmpdir}/*"))
+
             firejail_command = ['firejail', '--profile=firejail.profile']
             firejail_command.extend(command)
             print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}")
