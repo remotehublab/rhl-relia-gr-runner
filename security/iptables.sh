@@ -1,3 +1,7 @@
+brctl addbr br0
+ifconfig br0 10.10.20.1/24 up
+echo "1" > /proc/sys/net/ipv4/ip_forward
+
 iptables --flush
 iptables -t nat -F
 iptables -X

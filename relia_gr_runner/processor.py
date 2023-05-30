@@ -68,6 +68,7 @@ class Processor:
             firejail_command = ['firejail', '--profile=firejail.profile']
             firejail_command.extend(command)
             print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}")
+            print(f"[{time.asctime()}] So in reality it looks like: {' '.join(firejail_command)}")
             command_to_run = firejail_command
         else:
             print(f"[{time.asctime()}] Running command outside any sandbox: {' '.join(command)}")
