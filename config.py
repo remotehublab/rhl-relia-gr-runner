@@ -23,11 +23,11 @@ class DevelopmentConfig(Config):
 
 class StagingConfig(Config):
     DEBUG = False
-    USE_FIREJAIL = True
+    USE_FIREJAIL = os.environ.get('USE_FIREJAIL', '1') in ('1', 'true')
 
 class ProductionConfig(Config):
     DEBUG = False
-    USE_FIREJAIL = True
+    USE_FIREJAIL = os.environ.get('USE_FIREJAIL', '1') in ('1', 'true')
 
 configurations = {
     'default': DevelopmentConfig,
