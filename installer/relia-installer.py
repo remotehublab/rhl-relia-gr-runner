@@ -15,7 +15,7 @@ def install_system_packages():
     _run("sudo apt-get install -y bridge-utils build-essential python3-dev git python3-venv redis-server supervisor firejail gnuradio gnuradio-dev:armhf libgnuradio-analog*:armhf libgnuradio-audio*:armhf libgnuradio-blocks*:armhf libgnuradio-channels*:armhf libgnuradio-digital*:armhf libgnuradio-dtv*:armhf libgnuradio-fec*:armhf libgnuradio-fft*:armhf libgnuradio-filter*:armhf libgnuradio-iio* libgnuradio-pmt*:armhf libgnuradio-qtgui*:armhf libgnuradio-runtime*:armhf libgnuradio-trellis*:armhf libgnuradio-uhd*:armhf libgnuradio-video-sdl*:armhf libgnuradio-vocoder*:armhf libgnuradio-wavelet*:armhf libgnuradio-zeromq*:armhf")
 
 def _run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
-    print(f"$ {cmd}")
+    print(f"$ {cmd}", flush=True)
     raise_on_error = kwargs.pop('raise_on_error', True)
     result = subprocess.run(cmd, shell=True, *args, **kwargs)
     if raise_on_error and result.returncode != 0:
@@ -59,7 +59,7 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
     data_uploader_hostname = urlparse(data_uploader_url).netloc
     print(f"Data uploader hostname: {data_uploader_hostname}")
     data_uploader_ip_address = socket.gethostbyname(data_uploader_hostname)
-    print(f"Data uploader IP address: {data_uploader_ip_address}")
+    print(f"Data uploader IP address: {data_uploader_ip_address}", flush=True)
     adalm_pluto_ip_address_parts = adalm_pluto_ip_address.split('.')
     if len(adalm_pluto_ip_address_parts) != 4:
         raise ValueError(f"Invalid IP address format for ADALM Pluto: {adalm_pluto_ip_address}")
@@ -151,7 +151,7 @@ killasgroup=true
     _run("sudo supervisorctl update")
     _run("sudo supervisorctl restart relia")
 
-    print("Setup completed")
+    print("Setup completed", flush=True)
 
 def main():
     parser = argparse.ArgumentParser("RELIA Installer")
