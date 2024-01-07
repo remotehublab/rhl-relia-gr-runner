@@ -55,14 +55,18 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
         print("Enabling restricted network in firejail..")
         _run("sudo bash -c 'sed -i \"s/restricted-network no/restricted-network yes/\" /etc/firejail/firejail.config'")
 
+    print(f"Data uploader URL: {data_uploader_url}")
     data_uploader_hostname = urlparse(data_uploader_url).netloc
+    print(f"Data uploader hostname: {data_uploader_hostname}")
     data_uploader_ip_address = socket.gethostbyname(data_uploader_hostname)
+    print(f"Data uploader IP address: {data_uploader_ip_address}")
     adalm_pluto_ip_address_parts = adalm_pluto_ip_address.split('.')
     if len(adalm_pluto_ip_address_parts) != 4:
         raise ValueError(f"Invalid IP address format for ADALM Pluto: {adalm_pluto_ip_address}")
 
     adalm_pluto_ip_address_parts[-1] = '0'  # Replace the last part with '0'
     adalm_pluto_ip_network = '.'.join(adalm_pluto_ip_address_parts) + '/24'
+    print(f"ADALM Pluto IP address: {data_uploader_ip_address}")
 
     iptables_script = f"""
 brctl addbr br0
