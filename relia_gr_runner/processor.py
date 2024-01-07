@@ -62,8 +62,23 @@ class Processor:
                         f"read-only /home/{user}/relia-blocks",
                         f"whitelist /home/{user}/.gnuradio/prefs",
                         f"read-only /home/{user}/.gnuradio/prefs",
-                        f"whitelist {tmpdir}"
+                        f"whitelist {tmpdir}",
+                        f"read-only /home/{user}/.bashrc",
+                        f"read-only /home/{user}/.profile",
                     ])
+            # net br0
+            # ip 10.10.20.2
+
+            # include /etc/firejail/disable-common.inc
+            # include /etc/firejail/disable-devel.inc
+            # include /etc/firejail/disable-exec.inc
+            # include /etc/firejail/disable-passwdmgr.inc
+            # include /etc/firejail/disable-xdg.inc
+            # whitelist /tmp/relia-*
+
+            # blacklist /home/relia/relia-gr-runner
+            # read-only /home/relia/.bashrc
+            # read-only /home/relia/.profile
             open(os.path.join(tmpdir, 'firejail.profile'), 'w').write(profile)
 
             print(f"[{time.asctime()}] firejail.profile generated at {os.path.join(tmpdir, 'firejail.profile')}")
