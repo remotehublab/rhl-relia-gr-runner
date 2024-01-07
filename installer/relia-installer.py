@@ -149,6 +149,7 @@ killasgroup=true
     open("/etc/supervisor/conf.d/relia.conf", 'w').write(supervisor_config)
 
     _run("sudo supervisorctl update")
+    _run("sudo supervisorctl restart relia")
 
     print("Setup completed")
 
