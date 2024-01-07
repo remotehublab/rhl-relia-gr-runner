@@ -28,7 +28,7 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
     install_system_packages()
 
     if not os.path.exists('/home/relia'):
-        _run("sudo adduser --gecos "" --disabled-password relia")
+        _run("sudo adduser --gecos \"\" --disabled-password relia")
 
     if not os.path.exists("/home/relia/relia-blocks"):
         print("Downloading relia-blocks...")
