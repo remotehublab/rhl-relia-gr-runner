@@ -5,6 +5,9 @@ from flask import Flask
 
 from config import configurations
 
+from gnuradio import fft
+from gnuradio.fft import window
+
 def create_app(config_name: str = 'default'):
     # Based on Flasky https://github.com/miguelgrinberg/flasky
 
@@ -20,8 +23,21 @@ def create_app(config_name: str = 'default'):
         """
         Process tasks
         """
+        print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with 1024...")
+        fft.fft_vcc(1024, True, window.blackmanharris(1024), True, 1)
+        print(f"[{time.asctime()}] Cache created")
         processor = Processor(running_single_task=False)
         processor.run_forever()
+
+    @app.cli.command('create-gnuradio-fft-caches')
+    def create_caches():
+        """
+        These files take a long time to be created, but then they are cached.
+        """
+        for num in range(1, 16385):
+            print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with {num}...")
+            fft.fft_vcc(num, True, window.blackmanharris(num), True, 1)
+            print(f"[{time.asctime()}] Cache created")
 
     @app.cli.command("process-single-task")
     @click.option("--grc-filename", type=click.Path(exists=True))
