@@ -38,6 +38,7 @@ def create_app(config_name: str = 'default'):
             print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with {num}...")
             fft.fft_vcc(num, True, window.blackmanharris(num), True, 1)
             print(f"[{time.asctime()}] Cache created")
+            time.sleep(1)
 
     @app.cli.command("process-single-task")
     @click.option("--grc-filename", type=click.Path(exists=True))
