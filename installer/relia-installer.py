@@ -131,7 +131,10 @@ export SCHEDULER_BASE_URL='{scheduler_url}'
 export RELIA_GR_PYTHON_PATH=/home/relia/relia-blocks/python
 export ADALM_PLUTO_IP_ADDRESS={adalm_pluto_ip_address}
 export USE_FIREJAIL={use_firejail}
-    """
+export HOME=/home/relia
+export LOGNAME=relia
+export USER=relia
+    \n"""
     print("Writing prodrc configuration...")
     open("/home/relia/relia-gr-runner/prodrc", 'w').write(prodrc)
 
