@@ -96,9 +96,12 @@ class Processor:
             firejail_command.extend(command)
             print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}")
             print(f"[{time.asctime()}] So in reality it looks like: {' '.join(firejail_command)}")
+            print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}", file=sys.stderr)
+            print(f"[{time.asctime()}] So in reality it looks like: {' '.join(firejail_command)}", file=sys.stderr, flush=True)
             command_to_run = firejail_command
         else:
             print(f"[{time.asctime()}] Running command outside any sandbox: {' '.join(command)}")
+            print(f"[{time.asctime()}] Running command outside any sandbox: {' '.join(command)}", file=sys.stderr, flush=True)
             command_to_run = command
 
         return subprocess.Popen(command_to_run, cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
@@ -234,6 +237,7 @@ class Processor:
 
         delete_url = self.uploader_base_url + f"api/download/sessions/{session_id}/devices/{self.device_id}"
         print(f"[{time.asctime()}] Resetting device {self.device_id}: {delete_url}", flush=True)
+        print(f"[{time.asctime()}] Resetting device {self.device_id}: {delete_url}", file=sys.stderr, flush=True)
         delete_response = requests.delete(delete_url, timeout=(30,30))
         try:
             delete_response.raise_for_status()
@@ -241,6 +245,7 @@ class Processor:
             print(f"[{time.asctime()}] Error deleting previous device data: {err}; {delete_response.content}", file=sys.stderr, flush=True)
         else:
             print(f"[{time.asctime()}] Result of resetting device {self.device_id}:")
+            print(f"[{time.asctime()}] Result of resetting device {self.device_id}:", file=sys.stderr, flush=True)
             print(json.dumps(delete_response.json(), indent=4))
 
     def run_task(self, device_data: TaskAssignment):
@@ -272,12 +277,14 @@ class Processor:
 
         # Create a temporary directory and run the task inside
         with tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs) as tmpdir:
-            print(f"[{time.asctime()}] {self.device_type.title()} Running in temporary directory {tmpdir}...", flush=True)
+            print(f"[{time.asctime()}] {self.device_type.title()} running in temporary directory {tmpdir}...", flush=True)
+            print(f"[{time.asctime()}] {self.device_type.title()} running in temporary directory {tmpdir}...", file=sys.stderr, flush=True)
             self.run_task_in_directory(tmpdir, grc_manager, session_id, device_data, init_time, target_filename)
         
         # We have finished: notify other threads that this is over and report to the scheduler server that this is over
         self.task_is_running_event.set()
         print(f"{self.device_type.title()} completing task", flush=True)
+        print(f"{self.device_type.title()} completing task", file=sys.stderr, flush=True)
         self.scheduler.complete_assignments(device_data.taskIdentifier)
 
     def run_forever(self):
@@ -331,10 +338,13 @@ class Processor:
             event_set = task_is_running_event.wait(timeout=5)
             if event_set:
                 print(f"[{time.asctime()}] Thread event set. Stopping task status checking thread", flush=True)
+                print(f"[{time.asctime()}] Thread event set. Stopping task status checking thread", file=sys.stderr, flush=True)
                 break
 
             task_assignment_status = self.scheduler.check_assignment_status(task_identifier)
             print(f"[{time.asctime()}] Status of the task {task_identifier}: {task_assignment_status}", flush=True)
+            print(f"[{time.asctime()}] Status of the task {task_identifier}: {task_assignment_status}", file=sys.stderr, flush=True)
             if task_assignment_status in ("deleted", "completed"):
                 print(f"[{time.asctime()}] Stopping task status checking thread", flush=True)
+                print(f"[{time.asctime()}] Stopping task status checking thread", file=sys.stderr,  flush=True)
                 break
