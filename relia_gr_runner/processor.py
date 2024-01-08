@@ -115,11 +115,16 @@ class Processor:
         grc_filename = os.path.join(directory, 'user_file.grc')
         grc_manager.save(directory, 'user_file.grc')
 
-        open(os.path.join(directory, 'relia.json'), 'w').write(json.dumps({
+        relia_json = json.dumps({
             'uploader_base_url': self.uploader_base_url,
             'session_id': session_id,
             'device_id': self.device_id,
-        })) 
+        }, indent=4)
+
+        print(f"[{time.asctime()}] relia.json generated in directory {directory}", file=sys.stderr, flush=True)
+        print(relia_json, file=sys.stderr, flush=True)
+
+        open(os.path.join(directory, 'relia.json'), 'w').write(relia_json) 
 
         command = ['grcc', grc_filename, '-o', directory]
 
