@@ -59,6 +59,9 @@ class GrcManager:
                 block['parameters']['uri'] = f'"{os.environ.get("ADALM_PLUTO_IP_ADDRESS")}"'
 
     def process(self):
+        """
+        Process the YAML file. Called in save()
+        """
         self.grc_content['options']['parameters']['id'] = self.target_filename
         self.grc_content['options']['parameters']['generate_options'] = 'no_gui'
 

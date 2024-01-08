@@ -142,6 +142,8 @@ class Processor:
             self.early_terminate(device_data.taskIdentifier)
             return True
         
+        print(f"[{time.asctime()}] The process (GNU Radio Compiler) finished successfully.", file=sys.stderr, flush=True)
+        
         return False
 
     def run_task_in_directory(self, directory: str, grc_manager: GrcManager, session_id: str, device_data: TaskAssignment, init_time: float, target_filename: str):
@@ -156,11 +158,20 @@ class Processor:
         # TODO: in the future, instead of waiting a fixed time, stop the process 10 seconds AFTER the t.start() in the Python code inside the code
         gr_python_initial_time: float = time.time()
         p = self.run_in_sandbox([sys.executable, py_filename], directory)
+        if p.poll() is None:
+            print(f"[{time.asctime()}] The process ({py_filename}) started.", file=sys.stderr, flush=True)
+
+        last_message = time.time()
+
         while p.poll() is None:
             if self.must_stop_task(device_data, init_time):
                 p.terminate()
                 self.report_and_stop_task(device_data, init_time)
                 return
+            
+            if time.time() - last_message > 5:
+                print(f"[{time.asctime()}] The process ({py_filename}) is still running.", file=sys.stderr, flush=True)
+                last_message = time.time()
             
             time.sleep(0.1)
             elapsed = time.time() - gr_python_initial_time
@@ -248,7 +259,6 @@ class Processor:
         # Create a GRC Manager that will modify the YAML as needed to adapt to RELIA
         target_filename = 'target_file'
         grc_manager = GrcManager(grc_file_content, target_filename, self.default_hier_block_lib_dir)
-        grc_manager.process()
 
         # Report to the server that we are starting fresh and therefore we do want to delete any existing data
         # of the particular device in the particular session
@@ -262,6 +272,7 @@ class Processor:
 
         # Create a temporary directory and run the task inside
         with tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs) as tmpdir:
+            print(f"[{time.asctime()}] {self.device_type.title()} Running in temporary directory {tmpdir}...", flush=True)
             self.run_task_in_directory(tmpdir, grc_manager, session_id, device_data, init_time, target_filename)
         
         # We have finished: notify other threads that this is over and report to the scheduler server that this is over
