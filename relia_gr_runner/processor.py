@@ -170,7 +170,7 @@ class Processor:
             if self.must_stop_task(device_data, init_time):
                 p.terminate()
                 self.report_and_stop_task(device_data, init_time)
-                return
+                break
             
             if time.time() - last_message > 5:
                 print(f"[{time.asctime()}] The process ({py_filename}) is still running.", file=sys.stderr, flush=True)
@@ -183,7 +183,13 @@ class Processor:
                 p.terminate()
                 print(f"[{time.asctime()}] Running the GR Python code for over {max_gr_python_execution_time} seconds (value from MAX_GR_PYTHON_EXECUTION_TIME)... Calling self.early_terminate...", file=sys.stderr, flush=True)
                 self.early_terminate(device_data.taskIdentifier)
-                return
+                break
+
+        print(f"[{time.asctime()}] Waiting for the process to finish...", file=sys.stderr, flush=True)
+        try:
+            p.wait(timeout=10)
+        except Exception as err:
+            pass
 
         stdout, stderr = p.communicate()
         if p.returncode != 0:
