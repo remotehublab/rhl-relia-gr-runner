@@ -15,18 +15,18 @@ import requests
 
 from flask import current_app
 
-from .scheduler import SchedulerClient, TaskAssignment
+from .scheduler import AbstractSchedulerClient, NoSchedulerClient, SchedulerClient, TaskAssignment
 from .grc_manager import GrcManager
 
 class Processor:
-    def __init__(self):
-        self.device_id = current_app.config['DEVICE_ID']
-        self.password = current_app.config['PASSWORD']
-        self.device_type = current_app.config['DEVICE_TYPE']
-        self.uploader_base_url = current_app.config['DATA_UPLOADER_BASE_URL']
-        self.default_hier_block_lib_dir = os.environ.get('RELIA_GR_BLOCKS_PATH')
+    def __init__(self, running_single_task: bool = False):
+        self.device_id: str = current_app.config['DEVICE_ID']
+        self.password: str = current_app.config['PASSWORD']
+        self.device_type: str = current_app.config['DEVICE_TYPE']
+        self.uploader_base_url: str = current_app.config['DATA_UPLOADER_BASE_URL']
+        self.default_hier_block_lib_dir: str = os.environ.get('RELIA_GR_BLOCKS_PATH')
         if not self.default_hier_block_lib_dir:
-            self.default_hier_block_lib_dir = os.path.expanduser("~/.grc_gnuradio")
+            self.default_hier_block_lib_dir: str = os.path.expanduser("~/.grc_gnuradio")
         
         if not os.path.exists(self.default_hier_block_lib_dir):
             print(f"Error: RELIA_GR_BLOCKS_PATH not properly configured, path: {self.default_hier_block_lib_dir} not found.", file=sys.stderr, flush=True)
@@ -41,11 +41,15 @@ class Processor:
             print(f"Error: Unsupported device type: {self.device_type}", file=sys.stderr, flush=True)
             sys.exit(1)
 
-        self.thread_event = threading.Event()
-        self.scheduler = SchedulerClient()
+        self.task_is_running_event: threading.Event = threading.Event()
+        self.running_single_task = running_single_task
+        if running_single_task:
+            self.scheduler: AbstractSchedulerClient = NoSchedulerClient()
+        else:
+            self.scheduler: AbstractSchedulerClient = SchedulerClient()
         self.scheduler_polling_thread: Optional[threading.Thread] = None
 
-    def run_in_sandbox(self, command: List[str], tmpdir: str) -> subprocess.Popen:
+    def run_in_sandbox(self, command: List[str], directory: str) -> subprocess.Popen:
         """
         Run the command in a firejail sandbox
         """
@@ -62,7 +66,7 @@ class Processor:
                         f"read-only /home/{user}/relia-blocks",
                         f"whitelist /home/{user}/.gnuradio/prefs",
                         f"read-only /home/{user}/.gnuradio/prefs",
-                        f"whitelist {tmpdir}",
+                        f"whitelist {directory}",
                         f"read-only /home/{user}/.bashrc",
                         f"read-only /home/{user}/.profile",
                     ])
@@ -79,14 +83,14 @@ class Processor:
             # blacklist /home/relia/relia-gr-runner
             # read-only /home/relia/.bashrc
             # read-only /home/relia/.profile
-            open(os.path.join(tmpdir, 'firejail.profile'), 'w').write(profile)
+            open(os.path.join(directory, 'firejail.profile'), 'w').write(profile)
 
-            print(f"[{time.asctime()}] firejail.profile generated at {os.path.join(tmpdir, 'firejail.profile')}")
+            print(f"[{time.asctime()}] firejail.profile generated at {os.path.join(directory, 'firejail.profile')}")
             print(f"[{time.asctime()}] The content:")
             print(profile)
 
             print(f"[{time.asctime()}] The contents of the folder now are:")
-            print(glob.glob(f"{tmpdir}/*"))
+            print(glob.glob(f"{directory}/*"))
 
             firejail_command = ['firejail', '--profile=firejail.profile']
             firejail_command.extend(command)
@@ -97,70 +101,73 @@ class Processor:
             print(f"[{time.asctime()}] Running command outside any sandbox: {' '.join(command)}")
             command_to_run = command
 
-        return subprocess.Popen(command_to_run, cwd=tmpdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        return subprocess.Popen(command_to_run, cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    
+    def compile_grc_filename_into_python(self, directory: str, grc_manager: GrcManager, session_id: str, device_data: TaskAssignment, init_time: float) -> bool:
+        """
+        Compile the GRC into Python code
 
+        Return True if we have to finish this task immediately.
+        """
+        grc_filename = os.path.join(directory, 'user_file.grc')
+        grc_manager.save(directory, 'user_file.grc')
 
-    def run_task_in_directory(self, tmpdir: str, grc_manager: GrcManager, session_id: str, device_data: dict, init_time: float, target_filename: str):
-        grc_filename = os.path.join(tmpdir, 'user_file.grc')
-        py_filename = os.path.join(tmpdir, f'{target_filename}.py')
-
-        grc_manager.save(tmpdir, 'user_file.grc')
-
-        open(os.path.join(tmpdir, 'relia.json'), 'w').write(json.dumps({
+        open(os.path.join(directory, 'relia.json'), 'w').write(json.dumps({
             'uploader_base_url': self.uploader_base_url,
             'session_id': session_id,
             'device_id': self.device_id,
         })) 
 
-        command = ['grcc', grc_filename, '-o', tmpdir]
-        if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
-            if not self.scheduler_polling_thread.is_alive():
-                print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling self.early_terminate...", file=sys.stderr, flush=True)
-            else:
-                print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
-            self.early_terminate(device_data.taskIdentifier)
-            return
+        command = ['grcc', grc_filename, '-o', directory]
 
-        p = self.run_in_sandbox(command, tmpdir)
+        if self.must_stop_task(device_data, init_time):
+            self.report_and_stop_task(device_data, init_time)
+            return True
+
+        p = self.run_in_sandbox(command, directory)
         while p.poll() is None:
-            if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+            if self.must_stop_task(device_data, init_time):
                 p.terminate()
-                if not self.scheduler_polling_thread.is_alive():
-                    print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling self.early_terminate...", file=sys.stderr, flush=True)
-                else:
-                    print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
-                self.early_terminate(device_data.taskIdentifier)
-                return
+                self.report_and_stop_task(device_data, init_time)
+                return True
+            
             time.sleep(0.1)
 
         output, error = p.communicate()
         if p.returncode != 0:                 
-            print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling self.early_terminate...", file=sys.stderr, flush=True)
+            print(f"[{time.asctime()}] The process (GNU Radio Compiler) stopped with return code: {p.returncode}. Calling self.early_terminate...", file=sys.stderr, flush=True)
             print(f"[{time.asctime()}] Output: {output}", file=sys.stderr, flush=True)
             print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
             self.scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
             self.early_terminate(device_data.taskIdentifier)
+            return True
+        
+        return False
+
+    def run_task_in_directory(self, directory: str, grc_manager: GrcManager, session_id: str, device_data: TaskAssignment, init_time: float, target_filename: str):
+        """
+        Run a particular GRC file (from grc_manager) in a directory.
+        """
+        py_filename = os.path.join(directory, f'{target_filename}.py')
+
+        if self.compile_grc_filename_into_python(directory, grc_manager, session_id, device_data, init_time):
             return
 
         # TODO: in the future, instead of waiting a fixed time, stop the process 10 seconds AFTER the t.start() in the Python code inside the code
         gr_python_initial_time: float = time.time()
-        p = self.run_in_sandbox([sys.executable, py_filename], tmpdir)
+        p = self.run_in_sandbox([sys.executable, py_filename], directory)
         while p.poll() is None:
-            if not self.scheduler_polling_thread.is_alive() or time.perf_counter() - init_time > device_data.maxTime:
+            if self.must_stop_task(device_data, init_time):
                 p.terminate()
-                if not self.scheduler_polling_thread.is_alive():
-                    print(f"[{time.asctime()}] Scheduler polling thread stopped. Calling self.early_terminate...", file=sys.stderr, flush=True)
-                else:
-                    print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
-
-                self.early_terminate(device_data.taskIdentifier)
+                self.report_and_stop_task(device_data, init_time)
                 return
+            
             time.sleep(0.1)
             elapsed = time.time() - gr_python_initial_time
             max_gr_python_execution_time = current_app.config['MAX_GR_PYTHON_EXECUTION_TIME']
             if elapsed > max_gr_python_execution_time:
                 p.terminate()
-                print(f"[{time.asctime()}] Running the GR Python code for over {max_gr_python_execution_time}... Calling self.early_terminate...", file=sys.stderr, flush=True)
+                print(f"[{time.asctime()}] Running the GR Python code for over {max_gr_python_execution_time} seconds... Calling self.early_terminate...", file=sys.stderr, flush=True)
                 self.early_terminate(device_data.taskIdentifier)
                 return
 
@@ -171,40 +178,94 @@ class Processor:
             print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
             self.scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
             self.early_terminate(device_data.taskIdentifier)
-            return        
-
-    def run_task(self, device_data: dict):
-        """
-        Runs a task on a device.
-        """
-        init_time = time.perf_counter()
-        self.thread_event.clear()
-        self.scheduler_polling_thread = threading.Thread(target=self.thread_function, args=(device_data.taskIdentifier, self.thread_event), daemon=True)
-        self.scheduler_polling_thread.start()
-        grc_file_content = device_data.grcFileContent
+            return
         
-        target_filename = 'target_file'
-        grc_manager = GrcManager(grc_file_content, target_filename, self.default_hier_block_lib_dir)
+    def must_stop_task(self, device_data: TaskAssignment, init_time: float) -> bool:
+        """
+        If the scheduler has cancelled the task for any reason (user, other device, whatever)
+        OR if the max time has passed, then this task must stop.
+        """
+        if not self.scheduler_reports_task_still_active() or time.perf_counter() - init_time > device_data.maxTime:
+            return True
+        return False
+    
+    def report_and_stop_task(self, device_data: TaskAssignment, init_time: float):
+        """
+        Print a message indicating that the task has finished and call early_terminate()
+        """
+        if not self.scheduler_reports_task_still_active():
+            print(f"[{time.asctime()}] Scheduler stopped. Stopping task {device_data.taskIdentifier}...", file=sys.stderr, flush=True)
+        else:
+            print(f"[{time.asctime()}] Timed out (time elapsed: {time.perf_counter() - init_time}; max time: {device_data.maxTime}", file=sys.stderr, flush=True)
+        self.early_terminate(device_data.taskIdentifier)
 
+    def scheduler_reports_task_still_active(self) -> bool:
+        """
+        Returns true if the RELIA Scheduler is still saying that the task is active.
+
+        For example, if the student cancels the task, or the other device (transmitter/receiver) cancels the task
+        or there is an error this will return False.
+        """
+        if self.running_single_task:
+            return True
+        
+        # TODO: clean this logic at some point
+        if self.scheduler_polling_thread.is_alive():
+            return True
+        return False
+    
+    def _delete_existing_data_from_server(self, device_data: TaskAssignment):
+        """
+        The device might have still some data stored in the server, from previous executions or similar. 
+        This method deletes all the data.
+        """
         session_id = device_data.sessionIdentifier
 
-        print(f"[{time.asctime()}] Resetting device {self.device_id}", flush=True)
-        delete_response = requests.delete(self.uploader_base_url + f"api/download/sessions/{session_id}/devices/{self.device_id}")
+        delete_url = self.uploader_base_url + f"api/download/sessions/{session_id}/devices/{self.device_id}"
+        print(f"[{time.asctime()}] Resetting device {self.device_id}: {delete_url}", flush=True)
+        delete_response = requests.delete(delete_url, timeout=(30,30))
         try:
             delete_response.raise_for_status()
-            print(delete_response.json())
         except Exception as err:
             print(f"[{time.asctime()}] Error deleting previous device data: {err}; {delete_response.content}", file=sys.stderr, flush=True)
+        else:
+            print(f"[{time.asctime()}] Result of resetting device {self.device_id}:")
+            print(json.dumps(delete_response.json(), indent=4))
 
+    def run_task(self, device_data: TaskAssignment):
+        """
+        Runs a task on this device.
+        """
+        init_time = time.perf_counter()
+
+        # Launch a separate thread that polls on the scheduler (to notify that we are processing the request)
+        self.task_is_running_event.clear()
+        self.scheduler_polling_thread = threading.Thread(target=self.scheduler_poll, args=(device_data.taskIdentifier, self.task_is_running_event), daemon=True)
+        self.scheduler_polling_thread.start()
+
+        grc_file_content = device_data.grcFileContent
+        
+        # Create a GRC Manager that will modify the YAML as needed to adapt to RELIA
+        target_filename = 'target_file'
+        grc_manager = GrcManager(grc_file_content, target_filename, self.default_hier_block_lib_dir)
+        grc_manager.process()
+
+        # Report to the server that we are starting fresh and therefore we do want to delete any existing data
+        # of the particular device in the particular session
+        self._delete_existing_data_from_server(device_data)
 
         tmpdir_kwargs = {}
         if os.name == 'nt' or "microsoft" in platform.platform().lower():
             tmpdir_kwargs['ignore_cleanup_errors'] = True
         
+        session_id = device_data.sessionIdentifier
+
+        # Create a temporary directory and run the task inside
         with tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs) as tmpdir:
             self.run_task_in_directory(tmpdir, grc_manager, session_id, device_data, init_time, target_filename)
         
-        self.thread_event.set()
+        # We have finished: notify other threads that this is over and report to the scheduler server that this is over
+        self.task_is_running_event.set()
         print(f"{self.device_type.title()} completing task", flush=True)
         self.scheduler.complete_assignments(device_data.taskIdentifier)
 
@@ -214,12 +275,12 @@ class Processor:
             print(f"[{time.asctime()}] {self.device_type.title()} requesting assignment...", file=sys.stderr, flush=True)
             try:
                 if self.scheduler_polling_thread is not None:
-                    self.thread_event.set()
+                    self.task_is_running_event.set()
                     self.scheduler_polling_thread.join()
                     self.scheduler_polling_thread = None
                     print(f"[{time.asctime()}] Scheduler polling thread stopped.", file=sys.stderr, flush=True)
 
-                self.thread_event.clear()
+                self.task_is_running_event.clear()
 
                 device_data: Optional[TaskAssignment] = self.scheduler.get_assignments()
                 if not device_data:
@@ -239,16 +300,30 @@ class Processor:
                 time.sleep(2)
 
     def early_terminate(self, task_identifier):
+        """
+        Terminate the current execution and report to the scheduler and to the scheduler poll thread.
+        """
         print(f"[{time.asctime()}] Task being purged due to deletion", flush=True)
         print(f"[{time.asctime()}] Task being purged due to deletion", file=sys.stderr, flush=True)
-        self.thread_event.set()
+        self.task_is_running_event.set()
         self.scheduler.complete_assignments(task_identifier)
 
-    def thread_function(self, task_identifier, thread_event):
-        while not thread_event.is_set():
-            time.sleep(5)
-            task_assignment_status = self.scheduler.check_assignment(task_identifier)
-            print(f"[{time.asctime()}] Status of the task: {task_assignment_status}", flush=True)
+    def scheduler_poll(self, task_identifier: str, task_is_running_event: threading.Event):
+        """
+        This function is launched in a different thread. It will be checking the status of the task.
+        Whenever the statusi s delete or completed, it will stop running.
+
+        If the server stops at any point, there are several points that are checking it to know if
+        they should stop everything.
+        """
+        while not task_is_running_event.is_set():
+            event_set = task_is_running_event.wait(timeout=5)
+            if event_set:
+                print(f"[{time.asctime()}] Thread event set. Stopping task status checking thread", flush=True)
+                break
+
+            task_assignment_status = self.scheduler.check_assignment_status(task_identifier)
+            print(f"[{time.asctime()}] Status of the task {task_identifier}: {task_assignment_status}", flush=True)
             if task_assignment_status in ("deleted", "completed"):
                 print(f"[{time.asctime()}] Stopping task status checking thread", flush=True)
                 break

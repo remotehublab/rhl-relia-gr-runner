@@ -65,17 +65,20 @@ class GrcManager:
         self._apply_qt2relia_conversions()
         self._apply_adalm_pluto()
 
-    def _apply_file_conversions(self, tmpdir: str):
+    def _apply_file_conversions(self, directory: str):
         """
         Apply file conversions to filesink and filesource
         """
         for block in self.grc_content['blocks']:
             if block['id'] == 'blocks_file_sink':
                 secured_filename = secure_filename(block['parameters']['file'])
-                block['parameters']['file'] = os.path.join(tmpdir, 'files', secured_filename)
+                block['parameters']['file'] = os.path.join(directory, 'files', secured_filename)
 
-    def save(self, tmpdir: str, filename: str):
-        full_path = os.path.join(tmpdir, filename)
+    def save(self, directory: str, filename: str):
+        """
+        Save the file with that filename in that directory
+        """
+        full_path = os.path.join(directory, filename)
         self.process()
-        self._apply_file_conversions(tmpdir)
+        self._apply_file_conversions(directory)
         open(full_path, 'w').write(yaml.dump(self.grc_content, Dumper=Dumper))
