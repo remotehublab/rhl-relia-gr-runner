@@ -136,12 +136,12 @@ class Processor:
             
             time.sleep(0.1)
 
-        output, error = p.communicate()
+        stdout, stderr = p.communicate()
         if p.returncode != 0:                 
             print(f"[{time.asctime()}] The process (GNU Radio Compiler) stopped with return code: {p.returncode}. Calling self.early_terminate...", file=sys.stderr, flush=True)
-            print(f"[{time.asctime()}] Output: {output}", file=sys.stderr, flush=True)
-            print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
-            self.scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
+            print(f"[{time.asctime()}] Output: {stdout}", file=sys.stderr, flush=True)
+            print(f"[{time.asctime()}] Error: {stderr}", file=sys.stderr, flush=True)
+            self.scheduler.error_message_delivery(device_data.taskIdentifier, stdout + "\n" + stderr)
             self.early_terminate(device_data.taskIdentifier)
             return True
         
@@ -181,18 +181,22 @@ class Processor:
             max_gr_python_execution_time = current_app.config['MAX_GR_PYTHON_EXECUTION_TIME']
             if elapsed > max_gr_python_execution_time:
                 p.terminate()
-                print(f"[{time.asctime()}] Running the GR Python code for over {max_gr_python_execution_time} seconds... Calling self.early_terminate...", file=sys.stderr, flush=True)
+                print(f"[{time.asctime()}] Running the GR Python code for over {max_gr_python_execution_time} seconds (value from MAX_GR_PYTHON_EXECUTION_TIME)... Calling self.early_terminate...", file=sys.stderr, flush=True)
                 self.early_terminate(device_data.taskIdentifier)
                 return
 
-        output, error = p.communicate()
+        stdout, stderr = p.communicate()
         if p.returncode != 0:
             print(f"[{time.asctime()}] The process (GNU Radio) stopped with return code: {p.returncode}. Calling self.early_terminate...", file=sys.stderr, flush=True)
-            print(f"[{time.asctime()}] Output: {output}", file=sys.stderr, flush=True)
-            print(f"[{time.asctime()}] Error: {error}", file=sys.stderr, flush=True)
-            self.scheduler.error_message_delivery(device_data.taskIdentifier, output + "\n" + error)
+            print(f"[{time.asctime()}] Output: {stdout}", file=sys.stderr, flush=True)
+            print(f"[{time.asctime()}] Error: {stderr}", file=sys.stderr, flush=True)
+            self.scheduler.error_message_delivery(device_data.taskIdentifier, stdout + "\n" + stderr)
             self.early_terminate(device_data.taskIdentifier)
             return
+        
+        print(f"[{time.asctime()}] The process ({py_filename}) finished successfully.", file=sys.stderr, flush=True)
+        print(f"[{time.asctime()}] Output: {stdout}", file=sys.stderr, flush=True)
+        print(f"[{time.asctime()}] Error: {stderr}", file=sys.stderr, flush=True)
         
     def must_stop_task(self, device_data: TaskAssignment, init_time: float) -> bool:
         """
@@ -247,6 +251,7 @@ class Processor:
             print(f"[{time.asctime()}] Result of resetting device {self.device_id}:")
             print(f"[{time.asctime()}] Result of resetting device {self.device_id}:", file=sys.stderr, flush=True)
             print(json.dumps(delete_response.json(), indent=4))
+            print(json.dumps(delete_response.json(), indent=4), file=sys.stderr, flush=True)
 
     def run_task(self, device_data: TaskAssignment):
         """
@@ -344,7 +349,8 @@ class Processor:
             task_assignment_status = self.scheduler.check_assignment_status(task_identifier)
             print(f"[{time.asctime()}] Status of the task {task_identifier}: {task_assignment_status}", flush=True)
             print(f"[{time.asctime()}] Status of the task {task_identifier}: {task_assignment_status}", file=sys.stderr, flush=True)
+            # If the status is completed or deleted, stop
             if task_assignment_status in ("deleted", "completed"):
-                print(f"[{time.asctime()}] Stopping task status checking thread", flush=True)
-                print(f"[{time.asctime()}] Stopping task status checking thread", file=sys.stderr,  flush=True)
+                print(f"[{time.asctime()}] Stopping task polling thread", flush=True)
+                print(f"[{time.asctime()}] Stopping task polling thread", file=sys.stderr,  flush=True)
                 break
