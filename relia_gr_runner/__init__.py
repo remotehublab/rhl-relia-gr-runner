@@ -30,11 +30,14 @@ def create_app(config_name: str = 'default'):
         processor.run_forever()
 
     @app.cli.command('create-gnuradio-fft-caches')
-    def create_caches():
+    @click.option("--start", type=int, default=1)
+    @click.option("--end", type=int, default=2**14 + 1)
+    @click.option("--step", type=int, default=1)
+    def create_caches(start, end, step):
         """
         These files take a long time to be created, but then they are cached.
         """
-        for num in range(1, 16385):
+        for num in range(start, end + 1, step):
             print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with {num}...", flush=True)
             t0 = time.time()
             fft.fft_vcc(num, True, window.blackmanharris(num), True, 1)
