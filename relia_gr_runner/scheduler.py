@@ -77,7 +77,7 @@ class SchedulerClient(AbstractSchedulerClient):
         """
         Check the status of the currently assigned task
         """
-        device_data = requests.get(f"{self.base_url}scheduler/devices/task-status/{task_identifier}", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()
+        device_data = requests.get(f"{self.base_url}scheduler/devices/tasks/{self.device_type}/{task_identifier}", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()
         return device_data.get('status')
 
     def complete_assignments(self, task_identifier: str) -> None:
