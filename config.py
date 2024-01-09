@@ -8,7 +8,7 @@ class Config:
     SCHEDULER_BASE_URL = os.environ.get('SCHEDULER_BASE_URL')
     DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
     ADALM_PLUTO_IP_ADDRESS = os.environ.get('ADALM_PLUTO_IP_ADDRESS')
-    MAX_GR_PYTHON_EXECUTION_TIME = float(os.environ.get('MAX_GR_PYTHON_EXECUTION_TIME') or '12')
+    MAX_GR_PYTHON_EXECUTION_TIME = float(os.environ.get('MAX_GR_PYTHON_EXECUTION_TIME') or '20')
     USE_FIREJAIL = os.environ.get('USE_FIREJAIL') in ('1', 'true')
     FIREJAIL_IP_ADDRESS = os.environ.get('FIREJAIL_IP_ADDRESS') or '10.10.20.2'
     FIREJAIL_INTERFACE = os.environ.get('FIREJAIL_INTERFACE') or 'br0'
