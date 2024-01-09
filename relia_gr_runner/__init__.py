@@ -35,10 +35,23 @@ def create_app(config_name: str = 'default'):
         These files take a long time to be created, but then they are cached.
         """
         for num in range(1, 16385):
-            print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with {num}...")
+            print(f"[{time.asctime()}] Creating cache for fft.fft_vcc with {num}...", flush=True)
+            t0 = time.time()
             fft.fft_vcc(num, True, window.blackmanharris(num), True, 1)
-            print(f"[{time.asctime()}] Cache created")
-            time.sleep(1)
+            tf = time.time()
+            elapsed = tf - t0
+            print(f"[{time.asctime()}] Cache created", flush=True)
+
+            if elapsed > 5:
+                # If the CPU has been running for a while, give it a break to avoid increasing temperature
+                time.sleep(1)
+
+            if num % 256 == 0:
+                print(f"[{time.asctime()}] Creating backup...", flush=True)
+                backup_content = open(os.path.expanduser("~/.gr_fftw_wisdom"), 'r').read()
+                new_filename = os.path.expanduser(f"~/.backup-{num}-gr_fftw_wisdom")
+                open(new_filename, 'w').write(backup_content)
+                print(f"[{time.asctime()}] Backup created and stored at: {new_filename}", flush=True)
 
     @app.cli.command("process-single-task")
     @click.option("--grc-filename", type=click.Path(exists=True))
