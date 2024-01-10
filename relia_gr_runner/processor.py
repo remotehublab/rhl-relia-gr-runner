@@ -115,18 +115,6 @@ class Processor:
         grc_filename = os.path.join(directory, 'user_file.grc')
         grc_manager.save(directory, 'user_file.grc')
 
-        relia_json = json.dumps({
-            'uploader_base_url': self.uploader_base_url,
-            'session_id': device_data.sessionIdentifier,
-            'task_id': device_data.taskIdentifier,
-            'device_id': self.device_id,
-        }, indent=4)
-
-        print(f"[{time.asctime()}] relia.json generated in directory {directory}", file=sys.stderr, flush=True)
-        print(relia_json, file=sys.stderr, flush=True)
-
-        open(os.path.join(directory, 'relia.json'), 'w').write(relia_json) 
-
         command = ['grcc', grc_filename, '-o', directory]
 
         if self.must_stop_task(device_data, init_time):
@@ -160,6 +148,18 @@ class Processor:
         Run a particular GRC file (from grc_manager) in a directory.
         """
         py_filename = os.path.join(directory, f'{target_filename}.py')
+
+        relia_json = json.dumps({
+            'uploader_base_url': self.uploader_base_url,
+            'session_id': device_data.sessionIdentifier,
+            'task_id': device_data.taskIdentifier,
+            'device_id': self.device_id,
+        }, indent=4)
+
+        print(f"[{time.asctime()}] relia.json generated in directory {directory}", file=sys.stderr, flush=True)
+        print(relia_json, file=sys.stderr, flush=True)
+
+        open(os.path.join(directory, 'relia.json'), 'w').write(relia_json) 
 
         if device_data.fileType == 'py':
             # It was already compiled, no need to re-compile
