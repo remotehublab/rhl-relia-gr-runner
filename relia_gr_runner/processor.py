@@ -155,14 +155,18 @@ class Processor:
         
         return False
 
-    def run_task_in_directory(self, directory: str, grc_manager: GrcManager, device_data: TaskAssignment, init_time: float, target_filename: str):
+    def run_task_in_directory(self, directory: str, grc_manager: Optional[GrcManager], device_data: TaskAssignment, init_time: float, target_filename: str):
         """
         Run a particular GRC file (from grc_manager) in a directory.
         """
         py_filename = os.path.join(directory, f'{target_filename}.py')
 
-        if self.compile_grc_filename_into_python(directory, grc_manager, device_data, init_time):
-            return
+        if device_data.fileType == 'py':
+            # It was already compiled, no need to re-compile
+            open(py_filename, 'w').write(device_data.fileContent)
+        else:
+            if self.compile_grc_filename_into_python(directory, grc_manager, device_data, init_time):
+                return
 
         # TODO: in the future, instead of waiting a fixed time, stop the process 10 seconds AFTER the t.start() in the Python code inside the code
         gr_python_initial_time: float = time.time()
@@ -276,15 +280,19 @@ class Processor:
         self.scheduler_polling_thread = threading.Thread(target=self.scheduler_poll, args=(device_data.taskIdentifier, self.task_is_running_event), daemon=True)
         self.scheduler_polling_thread.start()
 
-        grc_file_content = device_data.grcFileContent
-        
-        # Create a GRC Manager that will modify the YAML as needed to adapt to RELIA
         target_filename = 'target_file'
-        grc_manager = GrcManager(grc_file_content, target_filename, self.default_hier_block_lib_dir)
+        if device_data.fileType == 'py':
+            grc_manager = None
+        else:
+            grc_file_content = device_data.fileContent
+            
+            # Create a GRC Manager that will modify the YAML as needed to adapt to RELIA
+            grc_manager = GrcManager(grc_file_content, target_filename, self.default_hier_block_lib_dir)
 
         # Report to the server that we are starting fresh and therefore we do want to delete any existing data
         # of the particular device in the particular session
-        self._delete_existing_data_from_server(device_data)
+        # self._delete_existing_data_from_server(device_data)
+        # TODO: Maybe we do not need to delete data anymore in this step
 
         tmpdir_kwargs = {}
         if os.name == 'nt' or "microsoft" in platform.platform().lower():

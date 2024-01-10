@@ -11,8 +11,9 @@ from flask import current_app
 class TaskAssignment(NamedTuple):
     taskIdentifier: str
     sessionIdentifier: str
-    grcFile: str
-    grcFileContent: str
+    file: str
+    fileContent: str
+    fileType: str
     maxTime: float
 
 class AbstractSchedulerClient:
@@ -66,8 +67,9 @@ class SchedulerClient(AbstractSchedulerClient):
             if device_data.get('success'):
                 return TaskAssignment(taskIdentifier=device_data.get('taskIdentifier'),
                               sessionIdentifier=device_data.get('sessionIdentifier'),
-                              grcFile=device_data.get('grcFile'),
-                              grcFileContent=device_data.get('grcFileContent'),
+                              file=device_data.get('file'),
+                              fileContent=device_data.get('fileContent'),
+                              fileType=device_data.get('filetype'),
                               maxTime=device_data.get('maxTime'))
             
             print(f"Scheduler server failed: {device_data}")

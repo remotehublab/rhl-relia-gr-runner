@@ -74,7 +74,7 @@ def create_app(config_name: str = 'default'):
         
         directory = os.path.abspath(directory)
 
-        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
+        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, file="foo.grc", fileContent=grc_original_content, fileType="grc")
         processor.run_task_in_directory(directory,  grc_manager, device_data, init_time=time.perf_counter(), target_filename='target_file')
 
     @app.cli.command("compile-grc")
@@ -92,7 +92,7 @@ def create_app(config_name: str = 'default'):
 
         directory = os.path.abspath(directory)
 
-        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
+        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, file="foo.grc", fileContent=grc_original_content, fileType="grc")
         processor.compile_grc_filename_into_python(directory,  grc_manager, device_data, init_time=time.perf_counter())
         
     return app
