@@ -117,8 +117,8 @@ class Processor:
 
         relia_json = json.dumps({
             'uploader_base_url': self.uploader_base_url,
-            # TODO: it used to be session_id, but we changed it for task_id. We should change the blocks code for this
-            'session_id': device_data.taskIdentifier,
+            'session_id': device_data.sessionIdentifier,
+            'task_id': device_data.taskIdentifier,
             'device_id': self.device_id,
         }, indent=4)
 
