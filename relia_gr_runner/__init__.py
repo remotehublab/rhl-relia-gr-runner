@@ -74,9 +74,8 @@ def create_app(config_name: str = 'default'):
         
         directory = os.path.abspath(directory)
 
-        fake_session_id = "non.existing.session"
-        device_data = TaskAssignment(sessionIdentifier=fake_session_id, taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
-        processor.run_task_in_directory(directory,  grc_manager, fake_session_id, device_data, init_time=time.perf_counter(), target_filename='target_file')
+        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
+        processor.run_task_in_directory(directory,  grc_manager, device_data, init_time=time.perf_counter(), target_filename='target_file')
 
     @app.cli.command("compile-grc")
     @click.option("--grc-filename", type=click.Path(exists=True))
@@ -93,9 +92,8 @@ def create_app(config_name: str = 'default'):
 
         directory = os.path.abspath(directory)
 
-        fake_session_id = "non.existing.session"
-        device_data = TaskAssignment(sessionIdentifier=fake_session_id, taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
-        processor.compile_grc_filename_into_python(directory,  grc_manager, fake_session_id, device_data, init_time=time.perf_counter())
+        device_data = TaskAssignment(sessionIdentifier="non.existing.session", taskIdentifier="invalid.task.id", maxTime=3600, grcFile="foo.grc", grcFileContent=grc_original_content)
+        processor.compile_grc_filename_into_python(directory,  grc_manager, device_data, init_time=time.perf_counter())
         
     return app
 

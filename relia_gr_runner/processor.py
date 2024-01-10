@@ -106,7 +106,7 @@ class Processor:
 
         return subprocess.Popen(command_to_run, cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     
-    def compile_grc_filename_into_python(self, directory: str, grc_manager: GrcManager, session_id: str, device_data: TaskAssignment, init_time: float) -> bool:
+    def compile_grc_filename_into_python(self, directory: str, grc_manager: GrcManager, device_data: TaskAssignment, init_time: float) -> bool:
         """
         Compile the GRC into Python code
 
@@ -117,7 +117,8 @@ class Processor:
 
         relia_json = json.dumps({
             'uploader_base_url': self.uploader_base_url,
-            'session_id': session_id,
+            # TODO: it used to be session_id, but we changed it for task_id. We should change the blocks code for this
+            'session_id': device_data.taskIdentifier,
             'device_id': self.device_id,
         }, indent=4)
 
@@ -154,13 +155,13 @@ class Processor:
         
         return False
 
-    def run_task_in_directory(self, directory: str, grc_manager: GrcManager, session_id: str, device_data: TaskAssignment, init_time: float, target_filename: str):
+    def run_task_in_directory(self, directory: str, grc_manager: GrcManager, device_data: TaskAssignment, init_time: float, target_filename: str):
         """
         Run a particular GRC file (from grc_manager) in a directory.
         """
         py_filename = os.path.join(directory, f'{target_filename}.py')
 
-        if self.compile_grc_filename_into_python(directory, grc_manager, session_id, device_data, init_time):
+        if self.compile_grc_filename_into_python(directory, grc_manager, device_data, init_time):
             return
 
         # TODO: in the future, instead of waiting a fixed time, stop the process 10 seconds AFTER the t.start() in the Python code inside the code
@@ -289,13 +290,11 @@ class Processor:
         if os.name == 'nt' or "microsoft" in platform.platform().lower():
             tmpdir_kwargs['ignore_cleanup_errors'] = True
         
-        session_id = device_data.sessionIdentifier
-
         # Create a temporary directory and run the task inside
         with tempfile.TemporaryDirectory(prefix='relia-', **tmpdir_kwargs) as tmpdir:
             print(f"[{time.asctime()}] {self.device_type.title()} running in temporary directory {tmpdir}...", flush=True)
             print(f"[{time.asctime()}] {self.device_type.title()} running in temporary directory {tmpdir}...", file=sys.stderr, flush=True)
-            self.run_task_in_directory(tmpdir, grc_manager, session_id, device_data, init_time, target_filename)
+            self.run_task_in_directory(tmpdir, grc_manager, device_data, init_time, target_filename)
         
         # We have finished: notify other threads that this is over and report to the scheduler server that this is over
         self.task_is_running_event.set()
