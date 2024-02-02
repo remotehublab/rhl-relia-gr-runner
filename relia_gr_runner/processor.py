@@ -199,7 +199,15 @@ class Processor:
         try:
             p.wait(timeout=10)
         except Exception as err:
-            pass
+            traceback.print_exc()
+
+        # If terminate() was not enough, kill it
+        if p.poll() is None:
+            try:
+                p.kill()
+                p.wait(timeout=10)
+            except:
+                traceback.print_exc()
 
         stdout, stderr = p.communicate()
         if p.returncode != 0:
