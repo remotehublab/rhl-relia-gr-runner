@@ -162,8 +162,13 @@ class Processor:
         open(os.path.join(directory, 'relia.json'), 'w').write(relia_json) 
 
         if device_data.fileType == 'py':
+            file_content = device_data.fileContent
+            if current_app.config['ADALM_PLUTO_IP_ADDRESS']:
+                file_content = file_content.replace("**RELIA_REPLACE_WITH_ADALM_PLUTO_IP_ADDRESS**", current_app.config['ADALM_PLUTO_IP_ADDRESS'])
+            if current_app.config['RED_PITAYA_IP_ADDRESS']:
+                file_content = file_content.replace("**RELIA_REPLACE_WITH_RED_PITAYA_IP_ADDRESS**", current_app.config['RED_PITAYA_IP_ADDRESS'])
             # It was already compiled, no need to re-compile
-            open(py_filename, 'w').write(device_data.fileContent)
+            open(py_filename, 'w').write(file_content)
         else:
             if self.compile_grc_filename_into_python(directory, grc_manager, device_data, init_time):
                 return
