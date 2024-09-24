@@ -3,6 +3,7 @@
 #
 
 import os
+import sys
 import socket
 import argparse
 import subprocess
@@ -74,9 +75,16 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
             raise ValueError(f"Invalid IP address format for ADALM Pluto: {adalm_pluto_ip_address}")
 
         adalm_pluto_ip_address_parts[-1] = '0'  # Replace the last part with '0'
-        adalm_pluto_ip_network = '.'.join(adalm_pluto_ip_address_parts) + '/24'
-        print(f" + ADALM Pluto network: {adalm_pluto_ip_network}")
+        sdr_device_ip_network = '.'.join(adalm_pluto_ip_address_parts) + '/24'
+        print(f" + ADALM Pluto network: {sdr_device_ip_network}")
         print("", flush=True)
+
+    elif redpitaya_ip_address is not None:
+        sdr_device_ip_network = redpitaya_ip_address + '/32'
+    else:
+        print(f"Error: adalm pluto or redpitaya IP must be provided")
+        sys.exit(1)
+        return
 
     if data_uploader_hostname not in open("/etc/hosts").read():
         hosts_content = open("/etc/hosts").read()
@@ -108,8 +116,8 @@ iptables -t nat -A POSTROUTING -o eth1 -s 10.10.20.0/24 -j MASQUERADE
 # Allow communication from firejail to the server and to the pluto
 iptables -A FORWARD -s 10.10.20.2 -d {data_uploader_ip_address} -j ACCEPT
 iptables -A FORWARD -d 10.10.20.2 -s {data_uploader_ip_address} -j ACCEPT
-iptables -A FORWARD -s 10.10.20.2 -d {adalm_pluto_ip_network} -j ACCEPT
-iptables -A FORWARD -d 10.10.20.2 -s {adalm_pluto_ip_network} -j ACCEPT
+iptables -A FORWARD -s 10.10.20.2 -d {sdr_device_ip_network} -j ACCEPT
+iptables -A FORWARD -d 10.10.20.2 -s {sdr_device_ip_network} -j ACCEPT
 
 # But disallow any other communication
 iptables -A FORWARD -s 10.10.20.2 -j REJECT
