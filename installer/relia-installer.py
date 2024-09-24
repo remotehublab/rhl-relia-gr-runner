@@ -24,7 +24,7 @@ def _run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
         raise Exception(f"Command failed: {cmd}")
     return result
 
-def install(device_id: str, device_password: str, device_type: str, data_uploader_url: str, scheduler_url: str, adalm_pluto_ip_address: str, use_firejail: str = '1'):
+def install(device_id: str, device_password: str, device_type: str, data_uploader_url: str, scheduler_url: str, adalm_pluto_ip_address: str, redpitaya_ip_address: str, use_firejail: str = '1'):
     print(f"Installing RELIA GR Runner in device {device_id} ({device_type})")
 
     install_system_packages()
@@ -68,14 +68,15 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
     print(f" + Data uploader hostname: {data_uploader_hostname}")
     data_uploader_ip_address = socket.gethostbyname(data_uploader_hostname)
     print(f" + Data uploader IP address: {data_uploader_ip_address}")
-    adalm_pluto_ip_address_parts = adalm_pluto_ip_address.split('.')
-    if len(adalm_pluto_ip_address_parts) != 4:
-        raise ValueError(f"Invalid IP address format for ADALM Pluto: {adalm_pluto_ip_address}")
+    if adalm_pluto_ip_address is not None:
+        adalm_pluto_ip_address_parts = adalm_pluto_ip_address.split('.')
+        if len(adalm_pluto_ip_address_parts) != 4:
+            raise ValueError(f"Invalid IP address format for ADALM Pluto: {adalm_pluto_ip_address}")
 
-    adalm_pluto_ip_address_parts[-1] = '0'  # Replace the last part with '0'
-    adalm_pluto_ip_network = '.'.join(adalm_pluto_ip_address_parts) + '/24'
-    print(f" + ADALM Pluto network: {adalm_pluto_ip_network}")
-    print("", flush=True)
+        adalm_pluto_ip_address_parts[-1] = '0'  # Replace the last part with '0'
+        adalm_pluto_ip_network = '.'.join(adalm_pluto_ip_address_parts) + '/24'
+        print(f" + ADALM Pluto network: {adalm_pluto_ip_network}")
+        print("", flush=True)
 
     if data_uploader_hostname not in open("/etc/hosts").read():
         hosts_content = open("/etc/hosts").read()
@@ -188,7 +189,8 @@ def main():
     parser.add_argument("--device-type", choices=('r', 'receiver', 't', 'transmitter'), help="Device type (r or t, receiver or transmitter)")
     parser.add_argument("--data-uploader-url", required=True, help="Data uploader URL")
     parser.add_argument("--scheduler-url", required=True, help="Scheduler URL")
-    parser.add_argument("--adalm-pluto-ip-address", default="192.168.2.1", help="Adalm Pluto IP address.")
+    parser.add_argument("--adalm-pluto-ip-address", default=None, help="Adalm Pluto IP address.")
+    parser.add_argument("--redpitaya-ip-address", default=None, help="Adalm Pluto IP address.")
     parser.add_argument("--use-firejail", default="1", help="Use firejail (1 or 0).")
 
     args = parser.parse_args()
@@ -199,7 +201,7 @@ def main():
     if device_type == 'transmitter':
         device_type = 't'
 
-    install(args.device_id, args.device_password, device_type, args.data_uploader_url, args.scheduler_url, args.adalm_pluto_ip_address, args.use_firejail)
+    install(args.device_id, args.device_password, device_type, args.data_uploader_url, args.scheduler_url, args.adalm_pluto_ip_address, args.redpitaya_ip_address, args.use_firejail)
 
 
 if __name__ == '__main__':
