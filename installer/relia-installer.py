@@ -35,7 +35,7 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
 
     if not os.path.exists("/home/relia/relia-blocks"):
         print(f"Downloading relia-blocks in {device_id} ({device_type})...")
-        _run("sudo -u relia bash -c 'cd; git clone https://gitlab.com/relia-project/gr-engine/relia-blocks.git'")
+        _run("sudo -u relia bash -c 'cd; git clone https://github.com/remotehublab/rhl-relia-gr-blocks.git'")
     else:
         print(f"Updating relia-blocks in {device_id} ({device_type})...")
         _run("sudo -u relia bash -c 'cd ~/relia-blocks; git pull'")
@@ -49,7 +49,7 @@ def install(device_id: str, device_password: str, device_type: str, data_uploade
 
     if not os.path.exists("/home/relia/relia-gr-runner"):
         print(f"Downloading relia-gr-runner in {device_id} ({device_type})...")
-        _run("sudo -u relia bash -c 'cd; git clone https://gitlab.com/relia-project/gr-engine/relia-gr-runner.git'")
+        _run("sudo -u relia bash -c 'cd; git clone https://github.com/remotehublab/rhl-relia-gr-runner.git'")
     else:
         print(f"Updating relia-gr-runner in {device_id} ({device_type})...")
         _run("sudo -u relia bash -c 'cd ~/relia-gr-runner; git pull'")
