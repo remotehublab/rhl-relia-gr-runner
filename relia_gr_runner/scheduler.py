@@ -55,7 +55,16 @@ class SchedulerClient(AbstractSchedulerClient):
 
     def get_assignments(self) -> Optional[TaskAssignment]:
         try:
-            device_data = requests.get(f"{self.base_url}scheduler/devices/tasks/{self.device_type}?max_seconds=5", headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30)).json()
+            url = f"{self.base_url}scheduler/devices/tasks/{self.device_type}?max_seconds=5"
+            response = requests.get(url, headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30))
+            try:
+                device_data = response.json()
+            except Exception as err:
+                print("Error processing request {url}", file=sys.stdout)
+                print("Error processing request {url}", file=sys.stderr)
+                print(response.text, file=sys.stdout, flush=True)
+                print(response.text, file=sys.stderr, flush=True)
+                raise
         except Exception as e:
             if str(e)[0] == '5':
                 time.sleep(2)
