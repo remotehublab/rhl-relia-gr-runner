@@ -25,8 +25,14 @@ def _run(cmd, *args, **kwargs) -> subprocess.CompletedProcess:
         raise Exception(f"Command failed: {cmd}")
     return result
 
-def install(device_id: str, device_password: str, device_type: str, data_uploader_url: str, scheduler_url: str, adalm_pluto_ip_address: str, redpitaya_ip_address: str, use_firejail: str = '1'):
+def install(device_id: str, device_password: str, device_type: str, data_uploader_url: str, scheduler_url: str, adalm_pluto_ip_address: str, redpitaya_ip_address: str, redpitaya_version: str, use_firejail: str = '1'):
     print(f"Installing RELIA GR Runner in device {device_id} ({device_type})")
+
+    if redpitaya_ip_address:
+        if not redpitaya_version:
+            print(f"Error: redpitaya version must be provided")
+            sys.exit(1)
+            return
 
     install_system_packages()
 
@@ -137,10 +143,23 @@ iptables -A FORWARD -d 10.10.20.2 -j REJECT
     open("/etc/cron.d/relia-iptables", 'w').write("@reboot root /usr/local/bin/iptables.sh\n")
     os.chmod("/etc/cron.d/relia-iptables", 0o755)
 
+    if redpitaya_ip_address:
+        # Add the external gnuradio blocks for redpitaya
+        if not os.path.exists("/home/relia/red-pitaya-notes"):
+            _run("git clone https://github.com/pavel-demin/red-pitaya-notes /home/relia/red-pitaya-notes")
+
     if adalm_pluto_ip_address:
         sdr_configuration = f"export ADALM_PLUTO_IP_ADDRESS={adalm_pluto_ip_address}"
     elif redpitaya_ip_address:
-        sdr_configuration = f"export RED_PITAYA_IP_ADDRESS={redpitaya_ip_address}"
+        sdr_configuration = f"export RED_PITAYA_IP_ADDRESS={redpitaya_ip_address}\n"
+        if redpitaya_version == '125':
+            sdr_configuration += "export GRC_BLOCKS_PATH=$GRC_BLOCKS_PATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver/gnuradio\n"
+        elif redpitaya_version == '122':
+            sdr_configuration += "export GRC_BLOCKS_PATH=$GRC_BLOCKS_PATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver_122_88/gnuradio\n"
+        else:
+            print(f"Error: {redpitaya_version} is not currently supported")
+            sys.exit(1)
+            return
     else:
         print(f"Error: adalm pluto or redpitaya IP must be provided")
         sys.exit(1)
@@ -159,13 +178,12 @@ iptables -A FORWARD -d 10.10.20.2 -j REJECT
         export DATA_UPLOADER_BASE_URL='{data_uploader_url}'
         export SCHEDULER_BASE_URL='{scheduler_url}'
         export RELIA_GR_PYTHON_PATH=/home/relia/relia-blocks/python
-        {sdr_configuration}
         export USE_FIREJAIL={use_firejail}
         export HOME=/home/relia
         export LOGNAME=relia
         export USER=relia
 
-        """)
+        """) + "\n" + sdr_configuration
     if use_firejail == '1':
         prodrc += dedent("""\
         FIREJAIL_IP_ADDRESS=10.10.20.2
@@ -207,7 +225,8 @@ def main():
     parser.add_argument("--data-uploader-url", required=True, help="Data uploader URL")
     parser.add_argument("--scheduler-url", required=True, help="Scheduler URL")
     parser.add_argument("--adalm-pluto-ip-address", default=None, help="Adalm Pluto IP address.")
-    parser.add_argument("--redpitaya-ip-address", default=None, help="Adalm Pluto IP address.")
+    parser.add_argument("--redpitaya-ip-address", default=None, help="Red Pitaya IP address.")
+    parser.add_argument("--redpitaya-version", default=None, help="Red Pitaya version (must be 122 or 125)")
     parser.add_argument("--use-firejail", default="1", help="Use firejail (1 or 0).")
 
     args = parser.parse_args()
@@ -218,7 +237,12 @@ def main():
     if device_type == 'transmitter':
         device_type = 't'
 
-    install(args.device_id, args.device_password, device_type, args.data_uploader_url, args.scheduler_url, args.adalm_pluto_ip_address, args.redpitaya_ip_address, args.use_firejail)
+    if args.redpitaya_version is not None and args.redpitaya_version not in ('122', '125'):
+        print(f"Error: redpitaya version must be 122 or 125")
+        sys.exit(1)
+        return
+
+    install(args.device_id, args.device_password, device_type, args.data_uploader_url, args.scheduler_url, args.adalm_pluto_ip_address, args.redpitaya_ip_address, args.redpitaya_version, args.use_firejail)
 
 
 if __name__ == '__main__':
