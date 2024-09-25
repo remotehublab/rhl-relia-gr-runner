@@ -34,8 +34,9 @@ class Processor:
             sys.exit(1)
 
         adalm_pluto_ip_address = current_app.config['ADALM_PLUTO_IP_ADDRESS']
-        if adalm_pluto_ip_address is None:
-            print(f"Error: ADALM_PLUTO_IP_ADDRESS environment variable is required")
+        red_pitaya_ip_address = current_app.config['RED_PITAYA_IP_ADDRESS']
+        if adalm_pluto_ip_address is None and red_pitaya_ip_address is None:
+            print(f"Error: ADALM_PLUTO_IP_ADDRESS or RED_PITAYA_IP_ADDRESS environment variable are required")
             sys.exit(1)
 
         if self.device_type not in ('receiver', 'transmitter'):
