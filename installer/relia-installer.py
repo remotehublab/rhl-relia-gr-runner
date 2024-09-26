@@ -155,9 +155,11 @@ iptables -A FORWARD -d 10.10.20.2 -j REJECT
         if redpitaya_version == '125':
             sdr_configuration += "export GRC_BLOCKS_PATH=$GRC_BLOCKS_PATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver/gnuradio\n"
             sdr_configuration += "export PYTHONPATH=$PYTHONPATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver/gnuradio\n"
+            sdr_configuration += "export RED_PITAYA_RATE=100000\n"
         elif redpitaya_version == '122':
             sdr_configuration += "export GRC_BLOCKS_PATH=$GRC_BLOCKS_PATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver_122_88/gnuradio\n"
             sdr_configuration += "export PYTHONPATH=$PYTHONPATH:/home/relia/red-pitaya-notes/projects/sdr_transceiver_122_88/gnuradio\n"
+            sdr_configuration += "export RED_PITAYA_RATE=96000\n"
         else:
             print(f"Error: {redpitaya_version} is not currently supported")
             sys.exit(1)

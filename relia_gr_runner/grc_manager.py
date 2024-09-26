@@ -65,6 +65,7 @@ class GrcManager:
         for block in self.grc_content['blocks']:
             if block['id'] in ('red_pitaya_sink', 'red_pitaya_source'):
                 block['parameters']['addr'] = f'"{os.environ.get("RED_PITAYA_IP_ADDRESS")}"'
+                block['parameters']['rate'] = f'{os.environ.get("RED_PITAYA_RATE")}'
 
     def process(self):
         """
