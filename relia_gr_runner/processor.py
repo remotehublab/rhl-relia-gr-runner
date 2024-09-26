@@ -173,7 +173,7 @@ class Processor:
                 file_content = file_content.replace("**RELIA_REPLACE_WITH_ADALM_PLUTO_IP_ADDRESS**", current_app.config['ADALM_PLUTO_IP_ADDRESS'])
             if current_app.config['RED_PITAYA_IP_ADDRESS']:
                 file_content = file_content.replace("**RELIA_REPLACE_WITH_RED_PITAYA_IP_ADDRESS**", current_app.config['RED_PITAYA_IP_ADDRESS'])
-                file_content = file_content.replace('"**RELIA_REPLACE_WITH_RED_PITAYA_RATE**"', current_app.config['RED_PITAYA_RATE'])
+                file_content = file_content.replace('128_95_205_60_128_95_196_55', current_app.config['RED_PITAYA_RATE'])
             # It was already compiled, no need to re-compile
             open(py_filename, 'w').write(file_content)
         else:
