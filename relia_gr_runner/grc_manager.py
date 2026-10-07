@@ -4,9 +4,9 @@ import time
 
 import yaml
 try:
-    from yaml import CLoader as Loader, CDumper as Dumper
+    from yaml import CSafeLoader as Loader, CSafeDumper as Dumper
 except ImportError:
-    from yaml import Loader, Dumper
+    from yaml import SafeLoader as Loader, SafeDumper as Dumper
 
 from werkzeug.utils import secure_filename
 
@@ -19,6 +19,8 @@ class GrcManager:
     """
     def __init__(self, grc_serialized_content: str, target_filename: str = 'target_file', gr_blocks_path: str = DEFAULT_HIER_BLOCK_LIB_DIR):
         self.grc_content = yaml.load(grc_serialized_content, Loader=Loader)
+        if not isinstance(self.grc_content, dict) or not isinstance(self.grc_content.get('blocks'), list):
+            raise ValueError('Expected a GNU Radio flowgraph with a blocks list')
         self.target_filename = target_filename
         self.gr_blocks_path = gr_blocks_path
 

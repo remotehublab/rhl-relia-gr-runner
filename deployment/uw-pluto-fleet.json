@@ -1,0 +1,15 @@
+{
+  "source": "UW RELIA live libIIO discovery, 2026-10-07",
+  "hosts": {
+    "s1i1r": "192.168.3.1", "s1i1t": "192.168.3.1",
+    "s1i2r": "192.168.3.1", "s1i2t": "192.168.3.1",
+    "s2i1r": "192.168.3.1", "s2i1t": "192.168.3.1",
+    "s2i2r": "192.168.3.1", "s2i2t": "192.168.3.1",
+    "s3i1r": "192.168.3.1", "s3i1t": "192.168.3.1",
+    "s3i2r": "192.168.3.1", "s3i2t": "192.168.3.1",
+    "s4i1r": "192.168.3.1", "s4i1t": "192.168.2.1",
+    "s4i2r": "192.168.2.1", "s4i2t": "192.168.2.1"
+  },
+  "profile_overrides": {"CHECK_HARDWARE_READY": "1"},
+  "excluded": {"s4i1r": "Radio absent after USB power cycle; preserve address until physical discovery"}
+}

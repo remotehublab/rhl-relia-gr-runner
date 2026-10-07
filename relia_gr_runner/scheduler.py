@@ -54,6 +54,11 @@ class SchedulerClient(AbstractSchedulerClient):
         self.password = current_app.config['PASSWORD']
 
     def get_assignments(self) -> Optional[TaskAssignment]:
+        if current_app.config.get('CHECK_HARDWARE_READY'):
+            from .hardware import radio_ready
+            if not radio_ready(current_app.config):
+                print('Radio discovery failed; withholding scheduler availability', file=sys.stderr, flush=True)
+                return None
         try:
             url = f"{self.base_url}scheduler/devices/tasks/{self.device_type}?max_seconds=5"
             response = requests.get(url, headers={'relia-device': self.device_id, 'relia-password': self.password}, timeout=(30,30))
@@ -66,7 +71,7 @@ class SchedulerClient(AbstractSchedulerClient):
                 print(response.text, file=sys.stderr, flush=True)
                 raise
         except Exception as e:
-            if str(e)[0] == '5':
+            if str(e).startswith('5'):
                 time.sleep(2)
             print(f"Error in get_assignments(): {e}")
             print(f"Error in get_assignments(): {e}", file=sys.stderr, flush=True)

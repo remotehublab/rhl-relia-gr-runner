@@ -7,6 +7,7 @@ class Config:
     DATA_UPLOADER_BASE_URL = os.environ.get('DATA_UPLOADER_BASE_URL')
     SCHEDULER_BASE_URL = os.environ.get('SCHEDULER_BASE_URL')
     DEVICE_TYPE = os.environ.get('DEVICE_TYPE')
+    CHECK_HARDWARE_READY = os.environ.get('CHECK_HARDWARE_READY') in ('1', 'true')
     ADALM_PLUTO_IP_ADDRESS = os.environ.get('ADALM_PLUTO_IP_ADDRESS')
     RED_PITAYA_IP_ADDRESS = os.environ.get('RED_PITAYA_IP_ADDRESS')
     RED_PITAYA_RATE = os.environ.get('RED_PITAYA_RATE')
