@@ -13,12 +13,15 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+from uw_recovery_state import validate_recovery, RECOVERY_BACKUP
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--host', required=True)
 parser.add_argument('--commit', required=True)
 parser.add_argument('--bundle', default='/tmp/uw-relia-runner.bundle')
 parser.add_argument('--apply', action='store_true')
+parser.add_argument('--reconcile-uw-recovery', action='store_true',
+                    help='Accept only the verified 2026-10-07 Unit 4 address/firewall repair')
 args = parser.parse_args()
 root = Path('/home/relia/relia-gr-runner')
 git = ['git', '-c', 'safe.directory=' + str(root), '-C', str(root)]
@@ -26,13 +29,22 @@ def run(command):
     return subprocess.check_output(command, text=True).strip()
 assert re.fullmatch(r's[1-4]i[12][rt]', args.host)
 assert re.fullmatch(r'[0-9a-f]{40}', args.commit)
+prior_recovery = None
+before = run(git + ['rev-parse', 'HEAD'])
 for ledger in (root / 'drift-status.yaml', Path('/drift-status.yaml')):
     if ledger.exists():
         import yaml
-        assert yaml.safe_load(ledger.read_text()).get('status') == 'clean', 'Unreconciled drift: ' + str(ledger)
+        record = yaml.safe_load(ledger.read_text())
+        if record.get('status') != 'clean':
+            assert args.reconcile_uw_recovery and ledger == root / 'drift-status.yaml', 'Unreconciled drift: ' + str(ledger)
+            backup = Path(RECOVERY_BACKUP)
+            validate_recovery(args.host, record, before,
+                              (root / 'prodrc').read_text(), (backup / 'prodrc').read_text(),
+                              Path('/usr/local/bin/iptables.sh').read_text(), (backup / 'iptables.sh').read_text(),
+                              Path('/etc/supervisor/conf.d/relia.conf').read_bytes(), (backup / 'relia.conf').read_bytes())
+            prior_recovery = record
 assert not run(git + ['diff', '--name-only']), 'Tracked hot patch must be reconciled'
 assert not run(git + ['diff', '--cached', '--name-only']), 'Staged hot patch must be reconciled'
-before = run(git + ['rev-parse', 'HEAD'])
 manifest = json.loads((Path(__file__).parent / 'uw-pluto-fleet.json').read_text())
 address = manifest['hosts'][args.host]
 profile = root / 'prodrc'
@@ -60,7 +72,8 @@ if address == '192.168.2.1':
     if lines not in new_firewall:
         new_firewall = new_firewall.replace(marker, lines + '\n\n' + marker)
 plan = dict(host=args.host, before=before, after=args.commit, address=address,
-            profile_changed=updated != original, firewall_changed=new_firewall != old_firewall)
+            profile_changed=updated != original, firewall_changed=new_firewall != old_firewall,
+            reconciles_dated_recovery=prior_recovery is not None)
 if not args.apply:
     print(json.dumps(plan)); raise SystemExit(0)
 backup = Path('/root/uw-relia-recovery-20261007')
@@ -73,6 +86,8 @@ if ledger.exists(): shutil.copy2(ledger, backup / 'drift-status.yaml')
 record = dict(status='active', scope='UW RELIA runner update and address repair',
               source_commit=args.commit, authoritative_source='remotehublab/rhl-relia-gr-runner',
               backup=str(backup), utc=datetime.datetime.now(datetime.timezone.utc).isoformat(), **plan)
+if prior_recovery is not None:
+    record['prior_recovery'] = prior_recovery
 ledger.write_text(json.dumps(record, indent=2))
 run(git + ['fetch', args.bundle, 'main'])
 assert run(git + ['rev-parse', 'FETCH_HEAD']) == args.commit
