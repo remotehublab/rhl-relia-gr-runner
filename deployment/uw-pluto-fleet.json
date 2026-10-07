@@ -7,9 +7,10 @@
     "s2i2r": "192.168.3.1", "s2i2t": "192.168.3.1",
     "s3i1r": "192.168.3.1", "s3i1t": "192.168.3.1",
     "s3i2r": "192.168.3.1", "s3i2t": "192.168.3.1",
-    "s4i1r": "192.168.3.1", "s4i1t": "192.168.2.1",
+    "s4i1r": "192.168.2.1", "s4i1t": "192.168.2.1",
     "s4i2r": "192.168.2.1", "s4i2t": "192.168.2.1"
   },
   "profile_overrides": {"CHECK_HARDWARE_READY": "1"},
-  "excluded": {"s4i1r": "Radio absent after USB power cycle; preserve address until physical discovery"}
+  "excluded": {},
+  "recovery": {"s4i1r": "Recovered after Pi reboot; genuine libIIO and paired 75 kHz RF test passed"}
 }

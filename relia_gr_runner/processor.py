@@ -98,7 +98,9 @@ class Processor:
             print(f"[{time.asctime()}] The contents of the folder now are:")
             print(glob.glob(f"{directory}/*"))
 
-            firejail_command = ['firejail', '--profile=firejail.profile']
+            # GRC may leave evaluator children behind. Return the compiler's
+            # own status and close its sandbox when that main process exits.
+            firejail_command = ['firejail', '--deterministic-exit-code', '--deterministic-shutdown', '--profile=firejail.profile']
             firejail_command.extend(command)
             print(f"[{time.asctime()}] Running command inside the firejail sandbox: {' '.join(command)}")
             print(f"[{time.asctime()}] So in reality it looks like: {' '.join(firejail_command)}")
